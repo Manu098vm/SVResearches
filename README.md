@@ -19,7 +19,7 @@ This program implements the Xoroshiro used by the Scarlet/Violet games for Raids
 While we can not predict advances for legit RNG manipulations (thanks Anubis for the confirmation!), the tool still offer some interesting functionalities:
 * Calculates the resulting raid Pokémon EC/PID/Stats given a Seed
 * Compute a seed that will result in a Shiny Pokémon
-* Check legality of Pokémon caught in raids
+* Check legality of Pokémon caught in raids (TODO: Add Species and Stars check)
 
 ## Random writings
 Exactly what the name tells. Collection of short writings I noted during my tests/experiments/researches.
