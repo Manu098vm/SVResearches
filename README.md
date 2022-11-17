@@ -16,7 +16,7 @@ The tool also creates a Raid block dump. From there we can analyze the raids see
 
 ## SVXoroCalc
 This program implements the Xoroshiro used by the Scarlet/Violet games for Raids.
-While at the time of writing I'm unsure if we can predict advances for legit RNG manipulations, the tool still offer some interesting functionalities:
+While we can not predict advances for legit RNG manipulations (thanks Anubis for the confirmation!), the tool still offer some interesting functionalities:
 * Calculates the resulting raid Pokémon EC/PID/Stats given a Seed
 * Compute a seed that will result in a Shiny Pokémon
 * Check legality of Pokémon caught in raids
