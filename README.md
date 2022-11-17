@@ -6,6 +6,7 @@ If you're interested in my work and want to discuss it, feel free to ping me on 
 
 ## Credits
 [PKHeX](https://github.com/kwsch/PKHeX) with all its devs and contributors for the awesome freamwork. 
+
 [Pokefinder](https://github.com/Admiral-Fish/PokeFinder) with all its devs and contributors for being an important and learningful resource.
 
 ## SVSaveBlockDecryptor
@@ -14,7 +15,7 @@ Notably, the tool will extract Pokémons from Boxes, Party and what I beleive be
 The tool also creates a Raid block dump. From there we can analyze the raids seeds.
 
 ## SVXoroCalc
-This program implements the Xoroshiro used by the Scarlet/Violet games.
+This program implements the Xoroshiro used by the Scarlet/Violet games for Raids.
 While at the time of writing I'm unsure if we can predict advances for legit RNG manipulations, the tool still offer some interesting functionalities:
 * Calculates the resulting raid Pokémon EC/PID/Stats given a Seed
 * Compute a seed that will result in a Shiny Pokémon
