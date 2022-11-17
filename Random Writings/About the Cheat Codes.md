@@ -18,7 +18,7 @@ Two possible values are returned by that RNG call, and based on that the game br
 
 From there it was pretty straight forward editing the code so it always branches to PidType4, then from there to PidType2. 
 
-This means that all the Pokémon that pass through `0x710089c3a0` to be generated, will have their PidType overwritten to ShinyForced, if they were Shiny Locked.
+This means that all the Pokémon that pass through `0x710089c3a0` to be generated, will have their PidType overwritten to ShinyForced, even if they were Shiny Locked.
 
 
 Trying to take a less invasive approach to make every Pokémon shiny, I tried to NOP (literally, makes it do nothing) the `Rolls = Rolls + 1` so the PID would've been rerolled until it was Shiny.
