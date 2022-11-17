@@ -23,7 +23,7 @@ I started to do experiments with raid seed only to see that only the Pokémon ge
 
 While it is possible to advance the Raid seeds by advancing the date in the system settings (no more weird connection tricks like in SwSh), the seeds becomes completely weirdly unpredictable by advancing over the second day.
 
-I assumed the seeding being Crypto, but note that it's only an assumption based on empiric tests and I still do not have any code evidences.
+I assumed the seeding being Crypto, but note that it's only an assumption based on empiric tests and ~~I still do not have any code evidences~~. [Anubis confirmed it is Crypto].
 
 While at the time of writing I'm under the impression nothing in this game is legally RNG manipulable, we can indeed check legality for Pokémon obtained through Raids. This is something.
 
