@@ -1,0 +1,5 @@
+[Force reroll for Xoroshiro-PidType3 (Raids Always Shiny)]
+04000000 00D0AF48 D503201F
+
+[Restore default roll for Xoroshiro-PidType3 (Raids Standard Shiny odds)]
+04000000 00D0AF48 110006F7

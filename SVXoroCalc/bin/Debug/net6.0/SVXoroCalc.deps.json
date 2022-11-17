@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "SVXoroCalc/1.0.0": {
+        "runtime": {
+          "SVXoroCalc.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SVXoroCalc/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
