@@ -175,8 +175,9 @@ public static class SVXoroCalc
             $"Shiny: {isShiny}\n" +
             $"IVs: {IV_HP}/{IV_ATK}/{IV_DEF}/{IV_SPA}/{IV_SPD}/{IV_SPE}\n" +
             $"Ability: {ability + 1}\n" +
-            $"Nature (Case 1): {(Nature)nature}\n" +
-            $"Nature (Case 2): {(Nature)nature2}\n");
+            $"Nature (without Gender call): {(Nature)nature}\n" +
+            $"Nature (with standard Gender call): {(Nature)nature2}\n" +
+            $"[Nature calculation might be inaccurate for some Pokémon]");
     }
 
     public static void ComputeShinySeed(uint seed = 0, bool showDetails = false)
@@ -278,7 +279,7 @@ public static class SVXoroCalc
             if (ABILITY != UNSET)
             {
                 var ability = (int)xoro.NextInt(NAbility);
-                if (ability-1 != ABILITY)
+                if (ability+1 != ABILITY)
                     return false;
 
                 if (NATURE != Nature.None)
@@ -304,6 +305,8 @@ public static class SVXoroCalc
     private static uint ForceShiny(uint PID, uint TID = UserTID, uint SID = UserSID) =>
         ((TID ^ SID ^ (PID & 0xFFFF) ^ 1) << 16) | (PID & 0xFFFF);
 
+    private static uint ForceNonShiny(uint PID) => PID ^ 0x10000000;
+
     private static string GetValidationString(uint seed, bool valid)
     {
         if (valid)
@@ -318,8 +321,6 @@ public static class SVXoroCalc
                 return true;
         return false;
     }
-
-    private static uint ForceNonShiny(uint PID) => PID ^ 0x10000000;
 
     public enum Nature : byte
     {
