@@ -12,4 +12,4 @@ I dumped the Pokémon and RAM-Injected it in my party. It was shiny since I had 
 
 Unless pid/ivs/nature are rerolled upon obtaining, players who want to reset stats will have to restart the game from the beginning. There's no way to read its stats without peeking at ram or dumping the save file.
 
-[IMG4]
+![img4](https://user-images.githubusercontent.com/52102823/202528725-e7afb1f3-6c9a-4475-8672-02f502cf8fc8.jpg)

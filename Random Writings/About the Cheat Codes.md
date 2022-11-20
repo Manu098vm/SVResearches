@@ -18,11 +18,11 @@ Two possible values are returned by that RNG call, and based on that the game br
 
 From there it was pretty straight forward editing the code so it always branches to PidType4, then from there to PidType2. 
 
-This means that all the Pokémon that pass through `0x710089c3a0` to be generated, will have their PidType overwritten to ShinyForced, if they were Shiny Locked.
+This means that all the Pokémon that pass through `0x710089c3a0` to be generated, will have their PidType overwritten to ShinyForced, even if they were Shiny Locked.
 
 
 Trying to take a less invasive approach to make every Pokémon shiny, I tried to NOP (literally, makes it do nothing) the `Rolls = Rolls + 1` so the PID would've been rerolled until it was Shiny.
 
-[img 4]
+![img4](https://user-images.githubusercontent.com/52102823/202528008-10a093cb-1851-4578-8bcf-2c92e11c12d6.png)
 
 This approach works great with Raids, but not with the Overworld Pokémon. Due to overworld being generated in huge amounts everywhere, this made the game to calculate a huge amount of PIDs making it to lag enormously.

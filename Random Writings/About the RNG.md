@@ -2,11 +2,13 @@ My first impression was that the games used Xoroshiro for pretty much all the Po
 
 Even if the Xoroshiro constants are always initialized, they get ignored if there is not a valid Xoroshiro Seed as `param_2` in the `0x7100d0a518` function.
 
-[IMG1]
+![img1](https://user-images.githubusercontent.com/52102823/202528343-29c055e2-f1d4-4ee0-923c-4e52c9c42b1e.png)
+
 
 In this case, the game branches code from a pointer. I followed that pointer with the GDB debugger, and that pointed me to the function `0x7101ee08b0`. CryptoRNG. :-(
 
-[IMG2]
+![img2](https://user-images.githubusercontent.com/52102823/202528363-e3eb8fa7-6617-4362-8a2b-05c1a94d2895.png)
+
 
 I still had hope due to the Xoroshiro initialization in the Else statement. 
 
@@ -21,7 +23,7 @@ I started to do experiments with raid seed only to see that only the Pokémon ge
 
 While it is possible to advance the Raid seeds by advancing the date in the system settings (no more weird connection tricks like in SwSh), the seeds becomes completely weirdly unpredictable by advancing over the second day.
 
-I assumed the seeding being Crypto, but note that it's only an assumption based on empiric tests and I still do not have any code evidences.
+I assumed the seeding being Crypto, but note that it's only an assumption based on empiric tests and ~~I still do not have any code evidences~~. [Anubis confirmed it is Crypto].
 
 While at the time of writing I'm under the impression nothing in this game is legally RNG manipulable, we can indeed check legality for Pokémon obtained through Raids. This is something.
 
@@ -34,4 +36,4 @@ A test I did was injecting the same seed in all the raids. All the raids resulte
 
 I still have to find how and where this is done in the code. I found an encouraging function at `0x710089c3a0`, I'll look into that as soon as I'll have time to.
 
-[IMG3]
+![img3](https://user-images.githubusercontent.com/52102823/202528384-6d71c552-c2ff-4d07-b208-4ab25e35f57f.png)
