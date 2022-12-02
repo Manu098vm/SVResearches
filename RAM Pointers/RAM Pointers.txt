@@ -1,6 +1,12 @@
+v1.1.0
+Raid Block Start: 	[[main+43A77C8]+160]+40 		Length: 0xC98
+B1S1: 			        [[[main+43A7778]+A90]+9B0]
+Party:			        [[[[main+43A77B8]+08]+(30+8*index)]+30]
+
+v1.0.1
 Raid Block: 	[[main+42FD560]+160]+40 		Length: 0xC98
-B1S1: 			[[[main+42FD510]+A90]+9B0] 
-Party:			[[[[main+42FD550]+08]+(30+8*index)]+30]
+B1S1: 			  [[[main+42FD510]+A90]+9B0] 
+Party:			  [[[[main+42FD550]+08]+(30+8*index)]+30]
 
 Example of party pointer to get the first Pokémon in the team:
 [[[[main+42FD550]+08]+30]+30]
