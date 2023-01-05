@@ -1,10 +1,11 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
 public static class SVXoroCalc
 {
-    const int MAX_SHINYROLLS = 1; //Assume only 1 shiny roll at the beginning of the game
-    const int MAX_LEGALITYROLLS = 4; //Need to check what's the maximum Shiny Roll legally reachable. Assume 4 for now.
+    const int MAX_SHINYROLLS = 1;
+    const int MAX_LEGALITYROLLS = 1;
 
     const ushort UserTID = 12345; //Player's classic TID
     const ushort UserSID = 54321; //Player's classic SID
@@ -24,15 +25,23 @@ public static class SVXoroCalc
     public static void Main()
     {
         Console.WriteLine("Basic SV Raid RNG Calculator by SkyLink98\n\n");
+
+        Console.WriteLine("This program has been discontinued in favor of Tera Finder.\nDo you want to download the latest Tera Finder release?\n[Y\\n]:");
+        var str = Console.ReadLine();
+        if(!string.IsNullOrWhiteSpace(str) && (str.ToLower().Equals("y") || str.ToLower().Equals("yes")))
+        {
+            Process.Start(new ProcessStartInfo { FileName = @"https://github.com/Manu098vm/Tera-Finder/releases/latest", UseShellExecute = true });
+        }
+
         while (true)
         {
-            Console.WriteLine($"Select mode:\n" +
+            Console.WriteLine($"\nSelect mode:\n" +
                 $"0 - Close program\n" +
                 $"1 - Calculate Pokémon Details and Stats\n" +
                 $"2 - Compute a Shiny seed\n" +
                 $"3 - Check Encounter Legality");
 
-            var str = Console.ReadLine();
+            str = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(str))
             {
                 if (str.Equals("0"))

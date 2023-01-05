@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FlatSharp" Version="6.3.5" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="pkNX.Structures">
+			<HintPath>deps\pkNX.Structures.dll</HintPath>
+		</Reference>
+		<Reference Include="pkNX.Structures.FlatBuffers">
+			<HintPath>deps\pkNX.Structures.FlatBuffers.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+</Project>

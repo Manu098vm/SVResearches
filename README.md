@@ -1,7 +1,6 @@
 ## About
-Collection of various script, tools and random writings about my recent researches on the Scarlet/Violet games. 
+Collection of various script, tools and random writings about my early researches on the Scarlet/Violet games. 
 They're not meant to be polished products for users, so I won't give support in setup/install/use etc.
-This readme will eventually be updated as I advance in the researches.
 If you're interested in my work and want to discuss it, feel free to ping me on discord #SkyLink98#5946
 
 ## Credits
@@ -19,10 +18,17 @@ This program implements the Xoroshiro used by the Scarlet/Violet games for Raids
 While we can not predict advances for legit RNG manipulations (thanks Anubis for the confirmation!), the tool still offer some interesting functionalities:
 * Calculates the resulting raid Pokémon EC/PID/Stats given a Seed
 * Compute a seed that will result in a Shiny Pokémon
-* Check legality of Pokémon caught in raids (TODO: Add Species and Stars check)
+* Check legality of Pokémon caught in raids
+
+**N.B**: The SVXoroCalc features as well as a lot of other functionalities have been implemented in [Tera-Finder](https://github.com/Manu098vm/Tera-Finder).
+
+## SVRaidParser
+This is a script that uses [pkNX](https://github.com/kwsch/pkNX) libraries to create human-readable JSON data from Event Raid flatbuffers.
+This is used to build the JSONs in the [Pporg Event Gallery](https://github.com/projectpokemon/EventsGallery).
+Event Raid data can be obtained by extracting the binaries from the save file with SVSaveBlockDecryptor or from [BCAT](https://github.com/Manu098vm/bcat_updates).
 
 ## Random writings
-Exactly what the name tells. Collection of short writings I noted during my tests/experiments/researches.
+Exactly what the name tells. Collection of short writings I noted during my early tests/experiments/researches.
 
 ## Ram Pointers
 Txt file with some RAM Pointers I found. They can be used with sys-botbase or noexes clients.
@@ -40,3 +46,5 @@ While writing these cheats was never one of my goals, I ended up with this while
 [Force reroll for Xoroshiro-PidType3 (Raids Always Shiny)] -> This will disable the "rolls++" statement during the Xoroshiro-PidType3 (Random Shiny) code block. This makes the PID to be rerolled until it gets Shiny.
 
 Do note that those cheats will make Raid Pokemon to be correctly seen as illegal by some legality checker programs.
+
+N.B: Updates for new game versions for those cheats are available in the [GBATemp thread](https://gbatemp.net/threads/pokemon-scarlet-violet-cheat-database.621563/).

@@ -29,11 +29,7 @@ While at the time of writing I'm under the impression nothing in this game is le
 
 We can also easily inject prefabricated seeds to encounter a wanted Pokémon. While this would result in a legal Pokémon, it's notably still cheating.
 
-I'm still unsure if the Host seed get sent to Guests in the multiplayer functionalities. Based on the SwSh games, that's most likely the case.
+I'm still unsure if the Host seed get sent to Guests in the multiplayer functionalities. Based on the SwSh games, that's most likely the case. [Edit: it is].
 
 
 A test I did was injecting the same seed in all the raids. All the raids resulted in the very same Pokémon and Difficulty Stars. This means both the species and the stars are likely to be determined by the Xoroshiro seed.
-
-I still have to find how and where this is done in the code. I found an encouraging function at `0x710089c3a0`, I'll look into that as soon as I'll have time to.
-
-![img3](https://user-images.githubusercontent.com/52102823/202528384-6d71c552-c2ff-4d07-b208-4ab25e35f57f.png)
