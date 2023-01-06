@@ -146,11 +146,17 @@ public static class Program
         };
 
         Directory.CreateDirectory(dir);
+        tableEncounters.RemoveEmptyEntries();
 
         DumpJson(tableEncounters, dir, "raid_enemy_array");
         DumpJson(tableDrops, dir, "fixed_reward_item_array");
         DumpJson(tableBonus, dir, "lottery_reward_item_array");
         DumpJson(tablePriority, dir, "raid_priority_array");
+    }
+
+    private static void RemoveEmptyEntries(this DeliveryRaidEnemyTableArray encounters)
+    {
+        encounters.Table = encounters.Table.Where(z => z.RaidEnemyInfo.BossPokePara.DevId != 0).ToArray();
     }
 
     private static void DumpJson(object flat, string dir, string name)

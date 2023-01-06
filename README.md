@@ -1,7 +1,7 @@
 ## About
 Collection of various script, tools and random writings about my early researches on the Scarlet/Violet games. 
 They're not meant to be polished products for users, so I won't give support in setup/install/use etc.
-If you're interested in my work and want to discuss it, feel free to ping me on discord #SkyLink98#5946
+If you're interested in my work and you want to discuss it, feel free to reach me on my [Discord server](https://discord.gg/F9nMfvw9sS).
 
 ## Credits
 [PKHeX](https://github.com/kwsch/PKHeX) with all its devs and contributors for the awesome freamwork. 
@@ -24,7 +24,7 @@ While we can not predict advances for legit RNG manipulations (thanks Anubis for
 
 ## SVRaidParser
 This is a script that uses [pkNX](https://github.com/kwsch/pkNX) libraries to create human-readable JSON data from Event Raid flatbuffers.
-This is used to build the JSONs in the [Pporg Event Gallery](https://github.com/projectpokemon/EventsGallery).
+This is used to build the JSONs in the [PPorg Event Gallery](https://github.com/projectpokemon/EventsGallery).
 Event Raid data can be obtained by extracting the binaries from the save file with SVSaveBlockDecryptor or from [BCAT](https://github.com/Manu098vm/bcat_updates).
 
 ## Random writings
