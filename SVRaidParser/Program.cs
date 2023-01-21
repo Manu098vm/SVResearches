@@ -1,7 +1,7 @@
 using pkNX.Structures;
 using pkNX.Structures.FlatBuffers;
-using System.Buffers.Binary;
 using System.Diagnostics;
+using RaidParser.Properties;
 
 namespace RaidParser;
 
@@ -10,7 +10,8 @@ public static class Program
     public static void Main()
     {
         if (Environment.GetCommandLineArgs().Length == 2)
-            try {
+            try 
+            {
                 DumpDistributionRaids(Environment.GetCommandLineArgs()[1]);
             }
             catch (Exception ex)
@@ -40,22 +41,30 @@ public static class Program
     public static void DumpDistributionRaids(string path)
     {
         Console.WriteLine("Processing...");
-        var list = new List<byte[]>();
+        var type2 = new List<byte[]>();
+        var type3 = new List<byte[]>();
+
         if (path.Contains("files"))
         {
             var newpath = path.Replace("files", "Files");
             Directory.Move(path, newpath);
             path = newpath;
         }
-        DumpDistributionRaids(path, list);
+
+        DumpDistributionRaids(path, type2, type3);
     }
 
-    private static void DumpDistributionRaids(string path, List<byte[]> list)
+    private static void DumpDistributionRaids(string path, List<byte[]> type2, List<byte[]> type3)
     {
         var dataEncounters = GetDistributionContents(Path.Combine(path, "raid_enemy_array"), out int indexEncounters);
         var dataDrop = GetDistributionContents(Path.Combine(path, "fixed_reward_item_array"), out int indexDrop);
         var dataBonus = GetDistributionContents(Path.Combine(path, "lottery_reward_item_array"), out int indexBonus);
         var priority = GetDistributionContents(Path.Combine(path, "raid_priority_array"), out int indexPriority);
+
+        // BCAT Indexes can be reused by mixing and matching old files when reverting temporary distributions back to prior long-running distributions.
+        // They don't have to match, but just note if they do.
+        Debug.WriteLineIf(indexEncounters == indexDrop && indexDrop == indexBonus && indexBonus == indexPriority,
+            $"Info: BCAT indexes are inconsistent! enc:{indexEncounters} drop:{indexDrop} bonus:{indexBonus} priority:{indexPriority}");
 
         var tableEncounters = FlatBufferConverter.DeserializeFrom<DeliveryRaidEnemyTableArray>(dataEncounters);
         var tableDrops = FlatBufferConverter.DeserializeFrom<DeliveryRaidFixedRewardItemArray>(dataDrop);
@@ -63,9 +72,34 @@ public static class Program
         var tablePriority = FlatBufferConverter.DeserializeFrom<DeliveryRaidPriorityArray>(priority);
         var index = tablePriority.Table[0].VersionNo;
 
-        AddToList(tableEncounters.Table, list);
+        var byGroupID = tableEncounters.Table
+            .Where(z => z.RaidEnemyInfo.Rate != 0)
+            .GroupBy(z => z.RaidEnemyInfo.DeliveryGroupID);
 
-        var dirDistText = Path.Combine(path, "..\\Json");
+        bool isNot7Star = false;
+        foreach (var group in byGroupID)
+        {
+            var items = group.ToArray();
+            if (items.Any(z => z.RaidEnemyInfo.Difficulty > 7))
+                throw new Exception($"Undocumented difficulty {items.First(z => z.RaidEnemyInfo.Difficulty > 7).RaidEnemyInfo.Difficulty}");
+
+            if (items.All(z => z.RaidEnemyInfo.Difficulty == 7))
+            {
+                if (items.Any(z => z.RaidEnemyInfo.CaptureRate != 2))
+                    throw new Exception($"Undocumented 7 star capture rate {items.First(z => z.RaidEnemyInfo.CaptureRate != 2).RaidEnemyInfo.CaptureRate}");
+                AddToList(items, type3, RaidSerializationFormat.Type3);
+                continue;
+            }
+
+            if (items.Any(z => z.RaidEnemyInfo.Difficulty == 7))
+                throw new Exception($"Mixed difficulty {items.First(z => z.RaidEnemyInfo.Difficulty > 7).RaidEnemyInfo.Difficulty}");
+            if (isNot7Star)
+                throw new Exception("Already saw a not-7-star group. How do we differentiate this slot determination from prior?");
+            isNot7Star = true;
+            AddToList(items, type2, RaidSerializationFormat.Type2);
+        }
+
+        var dirDistText = Path.Combine(path, "../Json");
         ExportParse(dirDistText, tableEncounters, tableDrops, tableBonus, tablePriority);
         ExportIdentifierBlock(index, path);
     }
@@ -77,7 +111,7 @@ public static class Program
         File.WriteAllText($"{path}\\..\\Identifier.txt", $"{index}");
     }
 
-    private static void AddToList(IReadOnlyCollection<DeliveryRaidEnemyTable> table, List<byte[]> list)
+    private static void AddToList(IReadOnlyCollection<DeliveryRaidEnemyTable> table, List<byte[]> list, RaidSerializationFormat format)
     {
         // Get the total weight for each stage of star count
         Span<ushort> weightTotalS = stackalloc ushort[StageStars.Length];
@@ -107,6 +141,7 @@ public static class Program
             if (info.Rate == 0)
                 continue;
             var difficulty = info.Difficulty;
+            TryAddToPickle(info, list, format, weightTotalS, weightTotalV, weightMinS, weightMinV);
             for (int stage = 0; stage < StageStars.Length; stage++)
             {
                 if (!StageStars[stage].Contains(difficulty))
@@ -119,39 +154,235 @@ public static class Program
         }
     }
 
+    private static void TryAddToPickle(RaidEnemyInfo enc, ICollection<byte[]> list, RaidSerializationFormat format,
+    ReadOnlySpan<ushort> totalS, ReadOnlySpan<ushort> totalV, ReadOnlySpan<ushort> minS, ReadOnlySpan<ushort> minV)
+    {
+        using var ms = new MemoryStream();
+        using var bw = new BinaryWriter(ms);
+
+        enc.SerializePKHeX(bw, (byte)enc.Difficulty, enc.Rate, format);
+        for (int stage = 0; stage < StageStars.Length; stage++)
+        {
+            bool noTotal = !StageStars[stage].Contains(enc.Difficulty);
+            ushort mS = minS[stage];
+            ushort mV = minV[stage];
+            bw.Write(noTotal ? (ushort)0 : mS);
+            bw.Write(noTotal ? (ushort)0 : mV);
+            bw.Write(noTotal || enc.RomVer is RaidRomType.TYPE_B ? (ushort)0 : totalS[stage]);
+            bw.Write(noTotal || enc.RomVer is RaidRomType.TYPE_A ? (ushort)0 : totalV[stage]);
+        }
+        if (format == RaidSerializationFormat.Type3)
+            enc.SerializeType3(bw);
+
+        enc.SerializeTeraFinder(bw);
+
+        var bin = ms.ToArray();
+        if (!list.Any(z => z.SequenceEqual(bin)))
+            list.Add(bin);
+    }
+
     private static void ExportParse(string dir,
         DeliveryRaidEnemyTableArray tableEncounters,
         DeliveryRaidFixedRewardItemArray tableDrops,
         DeliveryRaidLotteryRewardItemArray tableBonus,
         DeliveryRaidPriorityArray tablePriority)
     {
-        var dumpE = TableUtil.GetTable(tableEncounters.Table);
-        var dumpEnc = TableUtil.GetTable(tableEncounters.Table.Select(z => z.RaidEnemyInfo.BossPokePara));
-        var dumpRate = TableUtil.GetTable(tableEncounters.Table.Select(z => z.RaidEnemyInfo));
-        var dumpSize = TableUtil.GetTable(tableEncounters.Table.Select(z => z.RaidEnemyInfo.BossPokeSize));
-        var dumpD = TableUtil.GetTable(tableDrops.Table);
-        var dumpB = TableUtil.GetTable(tableBonus.Table);
-        var dumpP = TableUtil.GetTable(tablePriority.Table);
-        var dumpP_2 = TableUtil.GetTable(tablePriority.Table.Select(z => z.DeliveryGroupID));
-        var dump = new[]
-        {
-            ("encounters", dumpE),
-            ("encounters_poke", dumpEnc),
-            ("encounters_rate", dumpRate),
-            ("encounters_size", dumpSize),
-            ("drops", dumpD),
-            ("bonus", dumpB),
-            ("priority", dumpP),
-            ("priority_alt", dumpP_2),
-        };
-
         Directory.CreateDirectory(dir);
         tableEncounters.RemoveEmptyEntries();
-
         DumpJson(tableEncounters, dir, "raid_enemy_array");
         DumpJson(tableDrops, dir, "fixed_reward_item_array");
         DumpJson(tableBonus, dir, "lottery_reward_item_array");
         DumpJson(tablePriority, dir, "raid_priority_array");
+        DumpPretty(tableEncounters, tableDrops, tableBonus, dir);
+    }
+
+    private static void DumpPretty(DeliveryRaidEnemyTableArray tableEncounters, DeliveryRaidFixedRewardItemArray tableDrops, DeliveryRaidLotteryRewardItemArray tableBonus, string dir)
+    {
+        var cfg = new TextConfig(GameVersion.SV);
+        var lines = new List<string>();
+        var ident = tableEncounters.Table[0].RaidEnemyInfo.No;
+
+        var species = GetCommonText("monsname", cfg);
+        var items = GetCommonText("itemname", cfg);
+        var moves = GetCommonText("wazaname", cfg);
+        var types = GetCommonText("typename", cfg);
+        var natures = GetCommonText("seikaku", cfg);
+
+        lines.Add($"Event Raid Identifier: {ident}");
+
+        foreach (var entry in tableEncounters.Table)
+        {
+            var boss = entry.RaidEnemyInfo.BossPokePara;
+            var extra = entry.RaidEnemyInfo.BossDesc;
+            var nameDrop = entry.RaidEnemyInfo.DropTableFix;
+            var nameBonus = entry.RaidEnemyInfo.DropTableRandom;
+
+            if (boss.DevId == DevID.DEV_NULL)
+                continue;
+
+            var version = entry.RaidEnemyInfo.RomVer switch
+            {
+                RaidRomType.TYPE_A => "Scarlet",
+                RaidRomType.TYPE_B => "Violet",
+                _ => string.Empty,
+            };
+
+            var gem = boss.GemType switch
+            {
+                GemType.DEFAULT => "Default",
+                GemType.RANDOM => "Random",
+                _ => $"{types[(int)boss.GemType - 2]}",
+            };
+
+            var ability = boss.Tokusei switch
+            {
+                TokuseiType.SET_1 => "1 Only",
+                TokuseiType.SET_2 => "2 Only",
+                TokuseiType.SET_3 => "Hidden Only",
+                TokuseiType.RANDOM_12 => "1/2",
+                _ => "1/2/H",
+            };
+
+            var shiny = boss.RareType switch
+            {
+                RareType.RARE => "Always",
+                RareType.NO_RARE => "Never",
+                _ => string.Empty,
+            };
+
+            var talent = boss.TalentValue;
+            var iv = boss.TalentType switch
+            {
+                TalentType.VALUE when talent.HP == 31 && talent.ATK == 31 && talent.DEF == 31 && talent.SPA == 31 && talent.SPD == 31 && talent.SPE == 31 => "6 Flawless",
+                TalentType.VALUE => $"{boss.TalentValue.HP}/{boss.TalentValue.ATK}/{boss.TalentValue.DEF}/{boss.TalentValue.SPA}/{boss.TalentValue.SPD}/{boss.TalentValue.SPE}",
+                _ => $"{boss.TalentVnum} Flawless",
+            };
+
+            var form = boss.FormId == 0 ? string.Empty : $"-{(int)boss.FormId}";
+
+            lines.Add($"{entry.RaidEnemyInfo.Difficulty}-Star {species[(int)boss.DevId]}{form}");
+            if (entry.RaidEnemyInfo.RomVer != RaidRomType.BOTH)
+                lines.Add($"\tVersion: {version}");
+
+            lines.Add($"\tTera Type: {gem}");
+            lines.Add($"\tCapture Level: {entry.RaidEnemyInfo.CaptureLv}");
+            lines.Add($"\tAbility: {ability}");
+
+            if (boss.Seikaku != SeikakuType.DEFAULT)
+                lines.Add($"\tNature: {natures[(int)boss.Seikaku - 1]}");
+
+            lines.Add($"\tIVs: {iv}");
+
+            if (boss.RareType != RareType.DEFAULT)
+                lines.Add($"\tShiny: {shiny}");
+
+            lines.Add($"\t\tMoves:");
+            lines.Add($"\t\t\t- {moves[(int)boss.Waza1.WazaId]}");
+            if ((int)boss.Waza2.WazaId != 0) lines.Add($"\t\t\t- {moves[(int)boss.Waza2.WazaId]}");
+            if ((int)boss.Waza3.WazaId != 0) lines.Add($"\t\t\t- {moves[(int)boss.Waza3.WazaId]}");
+            if ((int)boss.Waza4.WazaId != 0) lines.Add($"\t\t\t- {moves[(int)boss.Waza4.WazaId]}");
+
+            lines.Add($"\t\tExtra Moves:");
+
+            if ((int)extra.ExtraAction1.Wazano == 0 && (int)extra.ExtraAction2.Wazano == 0 && (int)extra.ExtraAction3.Wazano == 0 && (int)extra.ExtraAction4.Wazano == 0 && (int)extra.ExtraAction5.Wazano == 0 && (int)extra.ExtraAction6.Wazano == 0)
+            {
+                lines.Add("\t\t\tNone!");
+            }
+
+            else
+            {
+                if ((int)extra.ExtraAction1.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction1.Wazano]}");
+                if ((int)extra.ExtraAction2.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction2.Wazano]}");
+                if ((int)extra.ExtraAction3.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction3.Wazano]}");
+                if ((int)extra.ExtraAction4.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction4.Wazano]}");
+                if ((int)extra.ExtraAction5.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction5.Wazano]}");
+                if ((int)extra.ExtraAction6.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction6.Wazano]}");
+            }
+
+            lines.Add("\t\tItem Drops:");
+
+            foreach (var item in tableDrops.Table.Where(z => z.TableName == nameDrop))
+            {
+                const int count = RaidFixedRewardItem.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    if (nameDrop != item.TableName)
+                        continue;
+
+                    var drop = item.GetReward(i);
+                    var limitation = (int)drop.SubjectType switch
+                    {
+                        (int)RaidRewardItemSubjectType.HOST => " (Only Host)",
+                        (int)RaidRewardItemSubjectType.CLIENT => " (Only Guests)",
+                        (int)RaidRewardItemSubjectType.ONCE => " (Only Once)",
+                        _ => string.Empty,
+                    };
+
+                    string GetItemName(int item)
+                    {
+                        bool isTM = (int)drop.ItemID is (>= 328 and <= 419) or (>= 618 and <= 620) or (>= 690 and <= 693) or (>= 2160 and <= 2231);
+                        var tm = PKHeX.Core.LearnSource9SV.TM_SV.ToArray();
+
+                        if (isTM) // append move name to TM
+                        {
+                            if ((int)drop.ItemID is >= 328 and <= 419)
+                                return $"{items[(int)drop.ItemID]} {moves[tm[001 + (int)drop.ItemID - 328]]}"; // TM001 to TM092, skip TM000 Mega Punch
+
+                            if ((int)drop.ItemID is 618 or 619 or 620)
+                                return $"{items[(int)drop.ItemID]} {moves[tm[093 + (int)drop.ItemID - 618]]}"; // TM093 to TM095
+
+                            if ((int)drop.ItemID is 690 or 691 or 692 or 693)
+                                return $"{items[(int)drop.ItemID]} {moves[tm[096 + (int)drop.ItemID - 690]]}"; // TM096 to TM099
+
+                            return $"{items[(int)drop.ItemID]} {moves[tm[100 + (int)drop.ItemID - 2160]]}"; // TM100 to TM171
+                        }
+
+                        return $"{items[(int)drop.ItemID]}";
+                    }
+
+                    if ((int)drop.Category == (int)RaidRewardItemCategoryType.POKE) // Material
+                        lines.Add($"\t\t\t{drop.Num,2} × Crafting Material{limitation}");
+
+                    if ((int)drop.Category == (int)RaidRewardItemCategoryType.GEM) // Material
+                        lines.Add($"\t\t\t{drop.Num,2} × Tera Shard{limitation}");
+
+                    if (drop.ItemID != 0)
+                        lines.Add($"\t\t\t{drop.Num,2} × {GetItemName((int)drop.ItemID)}{limitation}");
+                }
+            }
+
+            lines.Add("\t\tBonus Drops:");
+
+            foreach (var item in tableBonus.Table.Where(z => z.TableName == nameBonus))
+            {
+                const int count = RaidLotteryRewardItem.RewardItemCount;
+                float totalRate = 0;
+                for (int i = 0; i < count; i++)
+                    totalRate += item.GetRewardItem(i).Rate;
+
+                for (int i = 0; i < count; i++)
+                {
+                    if (nameBonus != item.TableName)
+                        continue;
+
+                    var drop = item.GetRewardItem(i);
+                    float rate = (float)(Math.Round((float)((item.GetRewardItem(i).Rate / totalRate) * 100f), 2));
+
+                    if ((int)drop.Category == (int)RaidRewardItemCategoryType.POKE) // Material
+                        lines.Add($"\t\t\t{(float)rate,5}% {drop.Num,2} × Crafting Material");
+
+                    if ((int)drop.Category == (int)RaidRewardItemCategoryType.GEM) // Tera Shard
+                        lines.Add($"\t\t\t{(float)rate,5}% {drop.Num,2} × Tera Shard");
+
+                    if (drop.ItemID != 0)
+                        lines.Add($"\t\t\t{(float)rate,5}% {drop.Num,2} × {items[(int)drop.ItemID]}");
+                }
+            }
+
+            lines.Add("");
+        }
+
+        File.WriteAllLines(Path.Combine(dir, $"../Encounters.txt"), lines);
     }
 
     private static void RemoveEmptyEntries(this DeliveryRaidEnemyTableArray encounters)
@@ -172,5 +403,24 @@ public static class Program
     {
         index = 0; //  todo
         return File.ReadAllBytes(path);
+    }
+
+    private static string[] GetCommonText(string name, TextConfig cfg)
+    {
+        byte[] data;
+        if (name.Equals("monsname"))
+            data = Resources.monsname_eng;
+        else if (name.Equals("itemname"))
+            data = Resources.itemname_eng;
+        else if (name.Equals("wazaname"))
+            data = Resources.wazaname_eng;
+        else if (name.Equals("typename"))
+            data = Resources.typename_eng;
+        else if (name.Equals("seikaku"))
+            data = Resources.seikaku_eng;
+        else
+            throw new ArgumentOutOfRangeException(name);
+
+        return new TextFile(data, cfg).Lines;
     }
 }
