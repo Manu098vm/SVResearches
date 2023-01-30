@@ -9,15 +9,20 @@ public static class Program
 {
     public static void Main()
     {
-        if (Environment.GetCommandLineArgs().Length == 2)
-            try 
+        if (Environment.GetCommandLineArgs().Length == 2 || Environment.GetCommandLineArgs().Length == 3)
+        {
+            try
             {
-                DumpDistributionRaids(Environment.GetCommandLineArgs()[1]);
+                if (Environment.GetCommandLineArgs().Length == 3 && (Environment.GetCommandLineArgs()[2].Equals("-n") || Environment.GetCommandLineArgs()[2].Equals("--null")))
+                    DumpDistributionRaids(Environment.GetCommandLineArgs()[1], true);
+                else
+                    DumpDistributionRaids(Environment.GetCommandLineArgs()[1], false);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
+        }
         else
             Console.WriteLine($"Drag and drop the event \"files\" folder into the .exe.\n" +
                 $"The files folder must contain the following files:\n" +
@@ -38,7 +43,7 @@ public static class Program
         new [] { 3, 4, 5 },
     };
 
-    public static void DumpDistributionRaids(string path)
+    public static void DumpDistributionRaids(string path, bool parsenull)
     {
         Console.WriteLine("Processing...");
         var type2 = new List<byte[]>();
@@ -51,10 +56,13 @@ public static class Program
             path = newpath;
         }
 
-        DumpDistributionRaids(path, type2, type3);
+        if (path.Contains("null"))
+            parsenull = true;
+
+        DumpDistributionRaids(path, type2, type3, parsenull);
     }
 
-    private static void DumpDistributionRaids(string path, List<byte[]> type2, List<byte[]> type3)
+    private static void DumpDistributionRaids(string path, List<byte[]> type2, List<byte[]> type3, bool parsenull)
     {
         var dataEncounters = GetDistributionContents(Path.Combine(path, "raid_enemy_array"), out int indexEncounters);
         var dataDrop = GetDistributionContents(Path.Combine(path, "fixed_reward_item_array"), out int indexDrop);
@@ -100,7 +108,7 @@ public static class Program
         }
 
         var dirDistText = Path.Combine(path, "../Json");
-        ExportParse(dirDistText, tableEncounters, tableDrops, tableBonus, tablePriority);
+        ExportParse(dirDistText, tableEncounters, tableDrops, tableBonus, tablePriority, parsenull);
         ExportIdentifierBlock(index, path);
     }
 
@@ -185,10 +193,14 @@ public static class Program
         DeliveryRaidEnemyTableArray tableEncounters,
         DeliveryRaidFixedRewardItemArray tableDrops,
         DeliveryRaidLotteryRewardItemArray tableBonus,
-        DeliveryRaidPriorityArray tablePriority)
+        DeliveryRaidPriorityArray tablePriority,
+        bool parsenull)
     {
         Directory.CreateDirectory(dir);
-        tableEncounters.RemoveEmptyEntries();
+
+        if(!parsenull)
+            tableEncounters.RemoveEmptyEntries();
+
         DumpJson(tableEncounters, dir, "raid_enemy_array");
         DumpJson(tableDrops, dir, "fixed_reward_item_array");
         DumpJson(tableBonus, dir, "lottery_reward_item_array");
