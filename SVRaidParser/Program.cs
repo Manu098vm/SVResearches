@@ -84,10 +84,14 @@ public static class Program
             .Where(z => z.RaidEnemyInfo.Rate != 0)
             .GroupBy(z => z.RaidEnemyInfo.DeliveryGroupID);
 
-        bool isNot7Star = false;
+        var seven = DistroGroupSet.None;
+        var other = DistroGroupSet.None;
+
         foreach (var group in byGroupID)
         {
             var items = group.ToArray();
+            var groupSet = Evaluate(items);
+
             if (items.Any(z => z.RaidEnemyInfo.Difficulty > 7))
                 throw new Exception($"Undocumented difficulty {items.First(z => z.RaidEnemyInfo.Difficulty > 7).RaidEnemyInfo.Difficulty}");
 
@@ -95,21 +99,53 @@ public static class Program
             {
                 if (items.Any(z => z.RaidEnemyInfo.CaptureRate != 2))
                     throw new Exception($"Undocumented 7 star capture rate {items.First(z => z.RaidEnemyInfo.CaptureRate != 2).RaidEnemyInfo.CaptureRate}");
+
+                if (!TryAdd(ref seven, groupSet))
+                    throw new Exception("Already saw a 7-star group. How do we differentiate this slot determination from prior?");
+
                 AddToList(items, type3, RaidSerializationFormat.Type3);
                 continue;
             }
 
             if (items.Any(z => z.RaidEnemyInfo.Difficulty == 7))
                 throw new Exception($"Mixed difficulty {items.First(z => z.RaidEnemyInfo.Difficulty > 7).RaidEnemyInfo.Difficulty}");
-            if (isNot7Star)
+
+            if (!TryAdd(ref other, groupSet))
                 throw new Exception("Already saw a not-7-star group. How do we differentiate this slot determination from prior?");
-            isNot7Star = true;
+
             AddToList(items, type2, RaidSerializationFormat.Type2);
         }
 
         var dirDistText = Path.Combine(path, "../Json");
         ExportParse(dirDistText, tableEncounters, tableDrops, tableBonus, tablePriority, parsenull);
         ExportIdentifierBlock(index, path);
+    }
+
+    private static bool TryAdd(ref DistroGroupSet exist, DistroGroupSet add)
+    {
+        if ((exist & add) != 0)
+            return false;
+        exist |= add;
+        return true;
+    }
+
+    [Flags]
+    private enum DistroGroupSet
+    {
+        None = 0,
+        SL = 1,
+        VL = 2,
+        Both = SL | VL,
+    }
+
+    private static DistroGroupSet Evaluate(DeliveryRaidEnemyTable[] items)
+    {
+        var versions = items.Select(z => z.RaidEnemyInfo.RomVer).Distinct().ToArray();
+        if (versions.Length == 2 && versions.Contains(RaidRomType.TYPE_A) && versions.Contains(RaidRomType.TYPE_B))
+            return DistroGroupSet.Both;
+        if (versions.Length == 1)
+            return versions[0] == RaidRomType.TYPE_A ? DistroGroupSet.SL : DistroGroupSet.VL;
+        throw new Exception("Unknown version");
     }
 
     private static void ExportIdentifierBlock(int index, string path)
@@ -322,44 +358,22 @@ public static class Program
                         continue;
 
                     var drop = item.GetReward(i);
-                    var limitation = (int)drop.SubjectType switch
+                    var limitation = drop.SubjectType switch
                     {
-                        (int)RaidRewardItemSubjectType.HOST => " (Only Host)",
-                        (int)RaidRewardItemSubjectType.CLIENT => " (Only Guests)",
-                        (int)RaidRewardItemSubjectType.ONCE => " (Only Once)",
+                        RaidRewardItemSubjectType.HOST => " (Only Host)",
+                        RaidRewardItemSubjectType.CLIENT => " (Only Guests)",
+                        RaidRewardItemSubjectType.ONCE => " (Only Once)",
                         _ => string.Empty,
                     };
 
-                    string GetItemName(int item)
-                    {
-                        bool isTM = (int)drop.ItemID is (>= 328 and <= 419) or (>= 618 and <= 620) or (>= 690 and <= 693) or (>= 2160 and <= 2231);
-                        var tm = PKHeX.Core.LearnSource9SV.TM_SV.ToArray();
-
-                        if (isTM) // append move name to TM
-                        {
-                            if ((int)drop.ItemID is >= 328 and <= 419)
-                                return $"{items[(int)drop.ItemID]} {moves[tm[001 + (int)drop.ItemID - 328]]}"; // TM001 to TM092, skip TM000 Mega Punch
-
-                            if ((int)drop.ItemID is 618 or 619 or 620)
-                                return $"{items[(int)drop.ItemID]} {moves[tm[093 + (int)drop.ItemID - 618]]}"; // TM093 to TM095
-
-                            if ((int)drop.ItemID is 690 or 691 or 692 or 693)
-                                return $"{items[(int)drop.ItemID]} {moves[tm[096 + (int)drop.ItemID - 690]]}"; // TM096 to TM099
-
-                            return $"{items[(int)drop.ItemID]} {moves[tm[100 + (int)drop.ItemID - 2160]]}"; // TM100 to TM171
-                        }
-
-                        return $"{items[(int)drop.ItemID]}";
-                    }
-
-                    if ((int)drop.Category == (int)RaidRewardItemCategoryType.POKE) // Material
+                    if (drop.Category == RaidRewardItemCategoryType.POKE) // Material
                         lines.Add($"\t\t\t{drop.Num,2} × Crafting Material{limitation}");
 
-                    if ((int)drop.Category == (int)RaidRewardItemCategoryType.GEM) // Material
+                    if (drop.Category == RaidRewardItemCategoryType.GEM) // Material
                         lines.Add($"\t\t\t{drop.Num,2} × Tera Shard{limitation}");
 
                     if (drop.ItemID != 0)
-                        lines.Add($"\t\t\t{drop.Num,2} × {GetItemName((int)drop.ItemID)}{limitation}");
+                        lines.Add($"\t\t\t{drop.Num,2} × {GetItemName((ushort)drop.ItemID, items, moves)}{limitation}");
                 }
             }
 
@@ -378,16 +392,16 @@ public static class Program
                         continue;
 
                     var drop = item.GetRewardItem(i);
-                    float rate = (float)(Math.Round((float)((item.GetRewardItem(i).Rate / totalRate) * 100f), 2));
+                    float rate = (float)(Math.Round((item.GetRewardItem(i).Rate / totalRate) * 100f, 2));
 
-                    if ((int)drop.Category == (int)RaidRewardItemCategoryType.POKE) // Material
-                        lines.Add($"\t\t\t{(float)rate,5}% {drop.Num,2} × Crafting Material");
+                    if (drop.Category == RaidRewardItemCategoryType.POKE) // Material
+                        lines.Add($"\t\t\t{rate,5}% {drop.Num,2} × Crafting Material");
 
-                    if ((int)drop.Category == (int)RaidRewardItemCategoryType.GEM) // Tera Shard
-                        lines.Add($"\t\t\t{(float)rate,5}% {drop.Num,2} × Tera Shard");
+                    if (drop.Category == RaidRewardItemCategoryType.GEM) // Tera Shard
+                        lines.Add($"\t\t\t{rate,5}% {drop.Num,2} × Tera Shard");
 
                     if (drop.ItemID != 0)
-                        lines.Add($"\t\t\t{(float)rate,5}% {drop.Num,2} × {items[(int)drop.ItemID]}");
+                        lines.Add($"\t\t\t{rate,5}% {drop.Num,2} × {items[(ushort)drop.ItemID]}");
                 }
             }
 
@@ -435,4 +449,31 @@ public static class Program
 
         return new TextFile(data, cfg).Lines;
     }
+
+    private static string GetItemName(ushort item, ReadOnlySpan<string> items, ReadOnlySpan<string> moves)
+    {
+        bool isTM = IsTM(item);
+        var tm = PKHeX.Core.LearnSource9SV.TM_SV.ToArray();
+
+        if (isTM) // append move name to TM
+            return GetNameTM(item, items, moves, tm);
+        return $"{items[item]}";
+    }
+
+    private static bool IsTM(ushort item) => item switch
+    {
+        >= 328 and <= 419 => true, // TM001 to TM092, skip TM000 Mega Punch
+        618 or 619 or 620 => true, // TM093 to TM095
+        690 or 691 or 692 or 693 => true, // TM096 to TM099
+        >= 2160 and <= 2231 => true, // TM100 to TM171
+        _ => false,
+    };
+
+    private static string GetNameTM(ushort item, ReadOnlySpan<string> items, ReadOnlySpan<string> moves, ReadOnlySpan<ushort> tm) => item switch
+    {
+        >= 328 and <= 419 => $"{items[item]} {moves[tm[001 + item - 328]]}", // TM001 to TM092, skip TM000 Mega Punch
+        618 or 619 or 620 => $"{items[item]} {moves[tm[093 + item - 618]]}", // TM093 to TM095
+        690 or 691 or 692 or 693 => $"{items[item]} {moves[tm[096 + item - 690]]}", // TM096 to TM099
+        _ => $"{items[item]} {moves[tm[100 + item - 2160]]}" // TM100 to TM171
+    };
 }
