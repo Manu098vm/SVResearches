@@ -101,7 +101,7 @@ public static class Program
                     throw new Exception($"Undocumented 7 star capture rate {items.First(z => z.RaidEnemyInfo.CaptureRate != 2).RaidEnemyInfo.CaptureRate}");
 
                 if (!TryAdd(ref seven, groupSet))
-                    throw new Exception("Already saw a 7-star group. How do we differentiate this slot determination from prior?");
+                    Console.WriteLine("Already saw a 7-star group. How do we differentiate this slot determination from prior?");
 
                 AddToList(items, type3, RaidSerializationFormat.Type3);
                 continue;
@@ -111,7 +111,7 @@ public static class Program
                 throw new Exception($"Mixed difficulty {items.First(z => z.RaidEnemyInfo.Difficulty > 7).RaidEnemyInfo.Difficulty}");
 
             if (!TryAdd(ref other, groupSet))
-                throw new Exception("Already saw a not-7-star group. How do we differentiate this slot determination from prior?");
+                Console.WriteLine("Already saw a not-7-star group. How do we differentiate this slot determination from prior?");
 
             AddToList(items, type2, RaidSerializationFormat.Type2);
         }
@@ -144,7 +144,15 @@ public static class Program
         if (versions.Length == 2 && versions.Contains(RaidRomType.TYPE_A) && versions.Contains(RaidRomType.TYPE_B))
             return DistroGroupSet.Both;
         if (versions.Length == 1)
-            return versions[0] == RaidRomType.TYPE_A ? DistroGroupSet.SL : DistroGroupSet.VL;
+        {
+            return versions[0] switch
+            {
+                RaidRomType.BOTH => DistroGroupSet.Both,
+                RaidRomType.TYPE_A => DistroGroupSet.SL,
+                RaidRomType.TYPE_B => DistroGroupSet.VL,
+                _ => throw new Exception("Unknown type."),
+            };
+        }
         throw new Exception("Unknown version");
     }
 
