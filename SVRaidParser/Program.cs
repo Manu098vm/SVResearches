@@ -223,10 +223,12 @@ public static class Program
             bw.Write(noTotal || enc.RomVer is RaidRomType.TYPE_B ? (ushort)0 : totalS[stage]);
             bw.Write(noTotal || enc.RomVer is RaidRomType.TYPE_A ? (ushort)0 : totalV[stage]);
         }
+
+        if (format == RaidSerializationFormat.Type2)
+            enc.SerializeType2(bw);
+
         if (format == RaidSerializationFormat.Type3)
             enc.SerializeType3(bw);
-
-        enc.SerializeTeraFinder(bw);
 
         var bin = ms.ToArray();
         if (!list.Any(z => z.SequenceEqual(bin)))
@@ -331,6 +333,9 @@ public static class Program
 
             if (boss.RareType != RareType.DEFAULT)
                 lines.Add($"\tShiny: {shiny}");
+
+            if (boss.Item != ItemID.ITEMID_NONE)
+                lines.Add($"\tHeld Item: {items[(int)boss.Item]}");
 
             lines.Add($"\t\tMoves:");
             lines.Add($"\t\t\t- {moves[(int)boss.Waza1.WazaId]}");
@@ -461,7 +466,7 @@ public static class Program
     private static string GetItemName(ushort item, ReadOnlySpan<string> items, ReadOnlySpan<string> moves)
     {
         bool isTM = IsTM(item);
-        var tm = PKHeX.Core.LearnSource9SV.TM_SV.ToArray();
+        var tm = new PKHeX.Core.PersonalInfo9SV(new byte[] { 0x0 }).RecordPermitIndexes.ToArray();
 
         if (isTM) // append move name to TM
             return GetNameTM(item, items, moves, tm);
