@@ -3,10 +3,10 @@ Raid Block Start:			[[main+44CCA68]+160]+40			Length: 0xC98
 B1S1:						[[[main+44CCA18]+A90]+9B0]
 Party:						[[[[main+44CCA58]+08]+(30+8*index)]+30]
 MyStatus:					[[main+44CCA68]+E0]+40
-fixed_reward_item_array:	[[[[[[[main+44CC800]+268]+E2C0]]+48]+10]+1C8]
-lottery_reward_item_array:	[[[[[[[main+44CC800]+268]+67B0]]+108]+10]+1C8]
+fixed_reward_item_array:	[[[main+44CCA68]+160]+6C68]
+lottery_reward_item_array:	[[[main+44CCA68]+160]+6CA0]
 raid_enemy_array:			[[[main+44CCA68]+160]+6C30]
-raid_priority_array:		[[main+44CCA68]+140]+B0
+raid_priority_array:		[[[main+44CCA68]+160]+6CD8]
 event_raid_identifier:		[[main+44A98C8]+160]+D8
 
 v1.1.0
