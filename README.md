@@ -1,6 +1,6 @@
 ## About
 Collection of various script, tools and random writings about my early researches on the Scarlet/Violet games. 
-They're not meant to be polished products for users, so I won't give support in setup/install/use etc.
+Please, do note that they're not meant to be polished products for users.
 If you're interested in my work and you want to discuss it, feel free to reach me on my [Discord server](https://discord.gg/F9nMfvw9sS).
 
 ## Credits
@@ -15,6 +15,8 @@ This is a very simple program that calls the PKHeX.Core functionalities to dump 
 Notably, the tool will extract Pokémons from Boxes, Party and what I beleive being the Overworld block.
 The tool also creates a Raid block dump. From there we can analyze the raids seeds.
 
+To use, drag & drop a Scarlet or Violet save file into the exe.
+
 ## SVXoroCalc
 This program implements the Xoroshiro used by the Scarlet/Violet games for Raids.
 While we can not predict advances for legit RNG manipulations (thanks Anubis for the confirmation!), the tool still offer some interesting functionalities:
@@ -22,12 +24,16 @@ While we can not predict advances for legit RNG manipulations (thanks Anubis for
 * Compute a seed that will result in a Shiny Pokémon
 * Check legality of Pokémon caught in raids
 
+To use, double click the exe and follow the instructions.
+
 **N.B**: The SVXoroCalc features as well as a lot of other functionalities have been implemented in [Tera-Finder](https://github.com/Manu098vm/Tera-Finder).
 
 ## SVRaidParser
 This is an adaptation for my needs of the [pkNX](https://github.com/kwsch/pkNX) [TeraRaidRipper](https://github.com/kwsch/pkNX/blob/master/pkNX.WinForms/Dumping/TeraRaidRipper.cs) functionalities. This creates human-readable JSON data from Event Raid flatbuffers.
 This is used to build the JSONs in the [PPorg Event Gallery](https://github.com/projectpokemon/EventsGallery).
 Event Raid data can be obtained by extracting the binaries from the save file with SVSaveBlockDecryptor or from [BCAT](https://github.com/Manu098vm/bcat_updates).
+
+To use, drag & drop the "files" folder into the exe. The folder must contain the "fixed_reward_item_array", "lottery_reward_item_array", "raid_enemy_array", "raid_priority_array" files.
 
 ## Random writings
 Exactly what the name tells. Collection of short writings I noted during my early tests/experiments/researches.
