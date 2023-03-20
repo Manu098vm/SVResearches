@@ -316,6 +316,14 @@ public static class Program
                 _ => $"{boss.TalentVnum} Flawless",
             };
 
+            var capture = entry.RaidEnemyInfo.CaptureRate switch
+            {
+                // 0 never?
+                // 1 always
+                2 => "Only Once",
+                _ => $"{entry.RaidEnemyInfo.CaptureRate}",
+            };
+
             var form = boss.FormId == 0 ? string.Empty : $"-{(int)boss.FormId}";
 
             lines.Add($"{entry.RaidEnemyInfo.Difficulty}-Star {species[(int)boss.DevId]}{form}");
@@ -336,6 +344,9 @@ public static class Program
 
             if (boss.Item != ItemID.ITEMID_NONE)
                 lines.Add($"\tHeld Item: {items[(int)boss.Item]}");
+
+            if (entry.RaidEnemyInfo.CaptureRate != 1)
+                lines.Add($"\tCatchable: {capture}");
 
             lines.Add($"\t\tMoves:");
             lines.Add($"\t\t\t- {moves[(int)boss.Waza1.WazaId]}");

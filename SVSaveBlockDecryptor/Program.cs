@@ -20,7 +20,16 @@ public static class Program
 
                     var box = sav9.Where(i => i.Key == 0x0D66012C).FirstOrDefault()!;
                     var party = sav9.Where(i => i.Key == 0x3AA1A9AD).FirstOrDefault()!;
-                    var spawn = sav9.Where(i => i.Key == 0x74ABBD32).FirstOrDefault()!;
+                    var KFixedSymbolRetainer01 = sav9.Where(i => i.Key == 0x74ABBD32).FirstOrDefault()!;
+                    var KFixedSymbolRetainer02 = sav9.Where(i => i.Key == 0x74ABBEE5).FirstOrDefault()!;
+                    var KFixedSymbolRetainer03 = sav9.Where(i => i.Key == 0x74ABB9CC).FirstOrDefault()!;
+                    var KFixedSymbolRetainer04 = sav9.Where(i => i.Key == 0x74ABBB7F).FirstOrDefault()!;
+                    var KFixedSymbolRetainer05 = sav9.Where(i => i.Key == 0x74ABB666).FirstOrDefault()!;
+                    var KFixedSymbolRetainer06 = sav9.Where(i => i.Key == 0x74ABB819).FirstOrDefault()!;
+                    var KFixedSymbolRetainer07 = sav9.Where(i => i.Key == 0x74ABB300).FirstOrDefault()!;
+                    var KFixedSymbolRetainer08 = sav9.Where(i => i.Key == 0x74ABB4B3).FirstOrDefault()!;
+                    var KFixedSymbolRetainer09 = sav9.Where(i => i.Key == 0x74ABCACA).FirstOrDefault()!;
+                    var KFixedSymbolRetainer10 = sav9.Where(i => i.Key == 0x74ABCC7D).FirstOrDefault()!;
                     var raid = sav9.Where(i => i.Key == 0xCAAC8800).FirstOrDefault()!;
 
                     var mystatus = sav9.Where(i => i.Key == 0xE3E89BD1).FirstOrDefault()!;
@@ -48,10 +57,55 @@ public static class Program
                     File.WriteAllBytes($"{path}\\Party\\{party.Key:X}.bin", party.Data);
                     ExportPokemons(party.Data, $"{path}\\Party");
 
-                    Directory.CreateDirectory($"{path}\\Spawn\\Encrypted");
-                    Directory.CreateDirectory($"{path}\\Spawn\\Decrypted");
-                    File.WriteAllBytes($"{path}\\Spawn\\{spawn.Key:X}.bin", spawn.Data);
-                    ExportPokemons(spawn.Data, $"{path}\\Spawn", intensive: true);
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer01\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer01\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer01\\{KFixedSymbolRetainer01.Key:X}.bin", KFixedSymbolRetainer01.Data);
+                    ExportPokemons(KFixedSymbolRetainer01.Data, $"{path}\\KFixedSymbolRetainer01", intensive: true);
+
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer02\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer02\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer02\\{KFixedSymbolRetainer02.Key:X}.bin", KFixedSymbolRetainer02.Data);
+                    ExportPokemons(KFixedSymbolRetainer02.Data, $"{path}\\KFixedSymbolRetainer02", intensive: true);
+
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer03\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer03\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer03\\{KFixedSymbolRetainer03.Key:X}.bin", KFixedSymbolRetainer03.Data);
+                    ExportPokemons(KFixedSymbolRetainer03.Data, $"{path}\\KFixedSymbolRetainer03", intensive: true);
+
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer04\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer04\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer04\\{KFixedSymbolRetainer04.Key:X}.bin", KFixedSymbolRetainer04.Data);
+                    ExportPokemons(KFixedSymbolRetainer04.Data, $"{path}\\KFixedSymbolRetainer04", intensive: true);
+
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer05\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer05\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer05\\{KFixedSymbolRetainer05.Key:X}.bin", KFixedSymbolRetainer05.Data);
+                    ExportPokemons(KFixedSymbolRetainer05.Data, $"{path}\\KFixedSymbolRetainer05", intensive: true);
+
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer06\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer06\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer06\\{KFixedSymbolRetainer06.Key:X}.bin", KFixedSymbolRetainer06.Data);
+                    ExportPokemons(KFixedSymbolRetainer06.Data, $"{path}\\KFixedSymbolRetainer06", intensive: true);
+
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer07\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer07\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer07\\{KFixedSymbolRetainer07.Key:X}.bin", KFixedSymbolRetainer07.Data);
+                    ExportPokemons(KFixedSymbolRetainer07.Data, $"{path}\\KFixedSymbolRetainer07", intensive: true);
+
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer08\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer08\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer08\\{KFixedSymbolRetainer08.Key:X}.bin", KFixedSymbolRetainer08.Data);
+                    ExportPokemons(KFixedSymbolRetainer08.Data, $"{path}\\KFixedSymbolRetainer08", intensive: true);
+
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer09\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer09\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer09\\{KFixedSymbolRetainer09.Key:X}.bin", KFixedSymbolRetainer09.Data);
+                    ExportPokemons(KFixedSymbolRetainer09.Data, $"{path}\\KFixedSymbolRetainer09", intensive: true);
+
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer10\\Encrypted");
+                    Directory.CreateDirectory($"{path}\\KFixedSymbolRetainer10\\Decrypted");
+                    File.WriteAllBytes($"{path}\\KFixedSymbolRetainer10\\{KFixedSymbolRetainer10.Key:X}.bin", KFixedSymbolRetainer10.Data);
+                    ExportPokemons(KFixedSymbolRetainer10.Data, $"{path}\\KFixedSymbolRetainer10", intensive: true);
 
                     Directory.CreateDirectory($"{path}\\Raid");
                     File.WriteAllBytes($"{path}\\Raid\\{raid.Key:X}.bin", raid.Data);
