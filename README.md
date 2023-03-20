@@ -8,6 +8,8 @@ If you're interested in my work and you want to discuss it, feel free to reach m
 
 [Pokefinder](https://github.com/Admiral-Fish/PokeFinder) with all its devs and contributors for being an important and learningful resource.
 
+[pkNX](https://github.com/kwsch/pkNX) with all its devs and contributors for the [TeraRaidRipper](https://github.com/kwsch/pkNX/blob/master/pkNX.WinForms/Dumping/TeraRaidRipper.cs).
+
 ## SVSaveBlockDecryptor
 This is a very simple program that calls the PKHeX.Core functionalities to dump the save file blocks.
 Notably, the tool will extract Pokémons from Boxes, Party and what I beleive being the Overworld block.
@@ -23,7 +25,7 @@ While we can not predict advances for legit RNG manipulations (thanks Anubis for
 **N.B**: The SVXoroCalc features as well as a lot of other functionalities have been implemented in [Tera-Finder](https://github.com/Manu098vm/Tera-Finder).
 
 ## SVRaidParser
-This is a script that uses [pkNX](https://github.com/kwsch/pkNX) libraries to create human-readable JSON data from Event Raid flatbuffers.
+This is an adaptation for my needs of the [pkNX](https://github.com/kwsch/pkNX) [TeraRaidRipper](https://github.com/kwsch/pkNX/blob/master/pkNX.WinForms/Dumping/TeraRaidRipper.cs) functionalities. This creates human-readable JSON data from Event Raid flatbuffers.
 This is used to build the JSONs in the [PPorg Event Gallery](https://github.com/projectpokemon/EventsGallery).
 Event Raid data can be obtained by extracting the binaries from the save file with SVSaveBlockDecryptor or from [BCAT](https://github.com/Manu098vm/bcat_updates).
 
