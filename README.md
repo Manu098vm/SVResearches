@@ -43,6 +43,8 @@ Txt file with some RAM Pointers I found. They can be used with sys-botbase or no
 * Pointer to the Party
 * Pointer to Box 1 Slot 1
 * Pointer to the Raids block
+* Pointer to MyStatus
+* Pointers to event Flatbuffers
 
 ## Shiny Cheats
 Txt file with some cheats that should work for both Scarlet and Violet v1.0.1.
