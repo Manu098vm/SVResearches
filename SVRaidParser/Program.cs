@@ -1,7 +1,8 @@
 using pkNX.Structures;
-using pkNX.Structures.FlatBuffers;
+using pkNX.Structures.FlatBuffers.SV;
 using System.Diagnostics;
 using RaidParser.Properties;
+using System.Text.Json;
 
 namespace RaidParser;
 
@@ -74,15 +75,15 @@ public static class Program
         Debug.WriteLineIf(indexEncounters == indexDrop && indexDrop == indexBonus && indexBonus == indexPriority,
             $"Info: BCAT indexes are inconsistent! enc:{indexEncounters} drop:{indexDrop} bonus:{indexBonus} priority:{indexPriority}");
 
-        var tableEncounters = FlatBufferConverter.DeserializeFrom<DeliveryRaidEnemyTableArray>(dataEncounters);
-        var tableDrops = FlatBufferConverter.DeserializeFrom<DeliveryRaidFixedRewardItemArray>(dataDrop);
-        var tableBonus = FlatBufferConverter.DeserializeFrom<DeliveryRaidLotteryRewardItemArray>(dataBonus);
-        var tablePriority = FlatBufferConverter.DeserializeFrom<DeliveryRaidPriorityArray>(priority);
+        var tableEncounters = pkNX.Structures.FlatBuffers.FlatBufferConverter.DeserializeFrom<DeliveryRaidEnemyTableArray>(dataEncounters);
+        var tableDrops = pkNX.Structures.FlatBuffers.FlatBufferConverter.DeserializeFrom<DeliveryRaidFixedRewardItemArray>(dataDrop);
+        var tableBonus = pkNX.Structures.FlatBuffers.FlatBufferConverter.DeserializeFrom<DeliveryRaidLotteryRewardItemArray>(dataBonus);
+        var tablePriority = pkNX.Structures.FlatBuffers.FlatBufferConverter.DeserializeFrom<DeliveryRaidPriorityArray>(priority);
         var index = tablePriority.Table[0].VersionNo;
 
         var byGroupID = tableEncounters.Table
-            .Where(z => z.RaidEnemyInfo.Rate != 0)
-            .GroupBy(z => z.RaidEnemyInfo.DeliveryGroupID);
+            .Where(z => z.Info.Rate != 0)
+            .GroupBy(z => z.Info.DeliveryGroupID);
 
         var seven = DistroGroupSet.None;
         var other = DistroGroupSet.None;
@@ -92,28 +93,28 @@ public static class Program
             var items = group.ToArray();
             var groupSet = Evaluate(items);
 
-            if (items.Any(z => z.RaidEnemyInfo.Difficulty > 7))
-                throw new Exception($"Undocumented difficulty {items.First(z => z.RaidEnemyInfo.Difficulty > 7).RaidEnemyInfo.Difficulty}");
+            if (items.Any(z => z.Info.Difficulty > 7))
+                throw new Exception($"Undocumented difficulty {items.First(z => z.Info.Difficulty > 7).Info.Difficulty}");
 
-            if (items.All(z => z.RaidEnemyInfo.Difficulty == 7))
+            if (items.All(z => z.Info.Difficulty == 7))
             {
-                if (items.Any(z => z.RaidEnemyInfo.CaptureRate != 2))
-                    throw new Exception($"Undocumented 7 star capture rate {items.First(z => z.RaidEnemyInfo.CaptureRate != 2).RaidEnemyInfo.CaptureRate}");
+                if (items.Any(z => z.Info.CaptureRate != 2))
+                    throw new Exception($"Undocumented 7 star capture rate {items.First(z => z.Info.CaptureRate != 2).Info.CaptureRate}");
 
                 if (!TryAdd(ref seven, groupSet))
                     Console.WriteLine("Already saw a 7-star group. How do we differentiate this slot determination from prior?");
 
-                AddToList(items, type3, RaidSerializationFormat.Type3);
+                AddToList(items, type3, RaidSerializationFormat.Might);
                 continue;
             }
 
-            if (items.Any(z => z.RaidEnemyInfo.Difficulty == 7))
-                throw new Exception($"Mixed difficulty {items.First(z => z.RaidEnemyInfo.Difficulty > 7).RaidEnemyInfo.Difficulty}");
+            if (items.Any(z => z.Info.Difficulty == 7))
+                throw new Exception($"Mixed difficulty {items.First(z => z.Info.Difficulty > 7).Info.Difficulty}");
 
             if (!TryAdd(ref other, groupSet))
                 Console.WriteLine("Already saw a not-7-star group. How do we differentiate this slot determination from prior?");
 
-            AddToList(items, type2, RaidSerializationFormat.Type2);
+            AddToList(items, type2, RaidSerializationFormat.Distribution);
         }
 
         var dirDistText = Path.Combine(path, "../Json");
@@ -140,7 +141,7 @@ public static class Program
 
     private static DistroGroupSet Evaluate(DeliveryRaidEnemyTable[] items)
     {
-        var versions = items.Select(z => z.RaidEnemyInfo.RomVer).Distinct().ToArray();
+        var versions = items.Select(z => z.Info.RomVer).Distinct().ToArray();
         if (versions.Length == 2 && versions.Contains(RaidRomType.TYPE_A) && versions.Contains(RaidRomType.TYPE_B))
             return DistroGroupSet.Both;
         if (versions.Length == 1)
@@ -170,7 +171,7 @@ public static class Program
         Span<ushort> weightTotalV = stackalloc ushort[StageStars.Length];
         foreach (var enc in table)
         {
-            var info = enc.RaidEnemyInfo;
+            var info = enc.Info;
             if (info.Rate == 0)
                 continue;
             var difficulty = info.Difficulty;
@@ -189,7 +190,7 @@ public static class Program
         Span<ushort> weightMinV = stackalloc ushort[StageStars.Length];
         foreach (var enc in table)
         {
-            var info = enc.RaidEnemyInfo;
+            var info = enc.Info;
             if (info.Rate == 0)
                 continue;
             var difficulty = info.Difficulty;
@@ -224,11 +225,11 @@ public static class Program
             bw.Write(noTotal || enc.RomVer is RaidRomType.TYPE_A ? (ushort)0 : totalV[stage]);
         }
 
-        if (format == RaidSerializationFormat.Type2)
-            enc.SerializeType2(bw);
+        if (format == RaidSerializationFormat.Distribution)
+            enc.SerializeDistribution(bw);
 
-        if (format == RaidSerializationFormat.Type3)
-            enc.SerializeType3(bw);
+        if (format == RaidSerializationFormat.Might)
+            enc.SerializeMight(bw);
 
         var bin = ms.ToArray();
         if (!list.Any(z => z.SequenceEqual(bin)))
@@ -251,14 +252,14 @@ public static class Program
         DumpJson(tableDrops, dir, "fixed_reward_item_array");
         DumpJson(tableBonus, dir, "lottery_reward_item_array");
         DumpJson(tablePriority, dir, "raid_priority_array");
-        DumpPretty(tableEncounters, tableDrops, tableBonus, dir);
+        DumpPretty(tableEncounters, tableDrops, tableBonus, tablePriority, dir);
     }
 
-    private static void DumpPretty(DeliveryRaidEnemyTableArray tableEncounters, DeliveryRaidFixedRewardItemArray tableDrops, DeliveryRaidLotteryRewardItemArray tableBonus, string dir)
+    private static void DumpPretty(DeliveryRaidEnemyTableArray tableEncounters, DeliveryRaidFixedRewardItemArray tableDrops, DeliveryRaidLotteryRewardItemArray tableBonus, DeliveryRaidPriorityArray tablePriority, string dir)
     {
         var cfg = new TextConfig(GameVersion.SV);
         var lines = new List<string>();
-        var ident = tableEncounters.Table[0].RaidEnemyInfo.No;
+        var ident = tablePriority.Table[0].VersionNo;
 
         var species = GetCommonText("monsname", cfg);
         var items = GetCommonText("itemname", cfg);
@@ -270,15 +271,15 @@ public static class Program
 
         foreach (var entry in tableEncounters.Table)
         {
-            var boss = entry.RaidEnemyInfo.BossPokePara;
-            var extra = entry.RaidEnemyInfo.BossDesc;
-            var nameDrop = entry.RaidEnemyInfo.DropTableFix;
-            var nameBonus = entry.RaidEnemyInfo.DropTableRandom;
+            var boss = entry.Info.BossPokePara;
+            var extra = entry.Info.BossDesc;
+            var nameDrop = entry.Info.DropTableFix;
+            var nameBonus = entry.Info.DropTableRandom;
 
             if (boss.DevId == DevID.DEV_NULL)
                 continue;
 
-            var version = entry.RaidEnemyInfo.RomVer switch
+            var version = entry.Info.RomVer switch
             {
                 RaidRomType.TYPE_A => "Scarlet",
                 RaidRomType.TYPE_B => "Violet",
@@ -316,22 +317,33 @@ public static class Program
                 _ => $"{boss.TalentVnum} Flawless",
             };
 
-            var capture = entry.RaidEnemyInfo.CaptureRate switch
+            var capture = entry.Info.CaptureRate switch
             {
                 // 0 never?
                 // 1 always
                 2 => "Only Once",
-                _ => $"{entry.RaidEnemyInfo.CaptureRate}",
+                _ => $"{entry.Info.CaptureRate}",
+            };
+
+            var size = boss.ScaleType switch
+            {
+                SizeType.VALUE => $"{boss.ScaleValue}",
+                SizeType.XS => "0-15",
+                SizeType.S => "16-47",
+                SizeType.M => "48-207",
+                SizeType.L => "208-239",
+                SizeType.XL => "240-255",
+                _ => string.Empty,
             };
 
             var form = boss.FormId == 0 ? string.Empty : $"-{(int)boss.FormId}";
 
-            lines.Add($"{entry.RaidEnemyInfo.Difficulty}-Star {species[(int)boss.DevId]}{form}");
-            if (entry.RaidEnemyInfo.RomVer != RaidRomType.BOTH)
+            lines.Add($"{entry.Info.Difficulty}-Star {species[(int)boss.DevId]}{form}");
+            if (entry.Info.RomVer != RaidRomType.BOTH)
                 lines.Add($"\tVersion: {version}");
 
             lines.Add($"\tTera Type: {gem}");
-            lines.Add($"\tCapture Level: {entry.RaidEnemyInfo.CaptureLv}");
+            lines.Add($"\tCapture Level: {entry.Info.CaptureLv}");
             lines.Add($"\tAbility: {ability}");
 
             if (boss.Seikaku != SeikakuType.DEFAULT)
@@ -339,13 +351,38 @@ public static class Program
 
             lines.Add($"\tIVs: {iv}");
 
+            var evs = boss.EffortValue.ToArray();
+            if (evs.Any(z => z != 0))
+            {
+                string[] names = new[] { "HP", "Atk", "Def", "SpA", "SpD", "Spe" };
+                var spread = new List<string>();
+
+                for (int i = 0; i < evs.Length; i++)
+                {
+                    if (evs[i] == 0)
+                        continue;
+                    spread.Add($"{evs[i]} {names[i]}");
+                }
+
+                lines.Add($"\tEVs: {string.Join(" / ", spread)}");
+            }
+
             if (boss.RareType != RareType.DEFAULT)
                 lines.Add($"\tShiny: {shiny}");
+
+            if (boss.ScaleType != SizeType.RANDOM)
+                lines.Add($"\tScale: {size}");
+
+            if (entry.Info.Difficulty == 7)
+            {
+                float hp = entry.Info.BossDesc.HpCoef / 100f;
+                lines.Add($"\tHP Multiplier: {hp:0.0}x");
+            }
 
             if (boss.Item != ItemID.ITEMID_NONE)
                 lines.Add($"\tHeld Item: {items[(int)boss.Item]}");
 
-            if (entry.RaidEnemyInfo.CaptureRate != 1)
+            if (entry.Info.CaptureRate != 1)
                 lines.Add($"\tCatchable: {capture}");
 
             lines.Add($"\t\tMoves:");
@@ -391,9 +428,9 @@ public static class Program
                     };
 
                     if (drop.Category == RaidRewardItemCategoryType.POKE) // Material
-                        lines.Add($"\t\t\t{drop.Num,2} × Crafting Material{limitation}");
+                        lines.Add($"\t\t\t{drop.Num,2} × TM Material{limitation}");
 
-                    if (drop.Category == RaidRewardItemCategoryType.GEM) // Material
+                    if (drop.Category == RaidRewardItemCategoryType.GEM) // Tera Shard
                         lines.Add($"\t\t\t{drop.Num,2} × Tera Shard{limitation}");
 
                     if (drop.ItemID != 0)
@@ -419,7 +456,7 @@ public static class Program
                     float rate = (float)(Math.Round((item.GetRewardItem(i).Rate / totalRate) * 100f, 2));
 
                     if (drop.Category == RaidRewardItemCategoryType.POKE) // Material
-                        lines.Add($"\t\t\t{rate,5}% {drop.Num,2} × Crafting Material");
+                        lines.Add($"\t\t\t{rate,5}% {drop.Num,2} × TM Material");
 
                     if (drop.Category == RaidRewardItemCategoryType.GEM) // Tera Shard
                         lines.Add($"\t\t\t{rate,5}% {drop.Num,2} × Tera Shard");
@@ -437,13 +474,35 @@ public static class Program
 
     private static void RemoveEmptyEntries(this DeliveryRaidEnemyTableArray encounters)
     {
-        encounters.Table = encounters.Table.Where(z => z.RaidEnemyInfo.BossPokePara.DevId != 0).ToArray();
+        encounters.Table = encounters.Table.Where(z => z.Info.BossPokePara.DevId != 0).ToArray();
     }
 
     private static void DumpJson(object flat, string dir, string name)
     {
-        var opt = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
-        var json = System.Text.Json.JsonSerializer.Serialize(flat, opt);
+        var opt = new JsonSerializerOptions { WriteIndented = true };
+        var json = JsonSerializer.Serialize(flat, opt);
+
+        if (name.Equals("raid_priority_array"))
+        {
+            var table = ((DeliveryRaidPriorityArray)flat).Table;
+            var groups = table.Select(g => g.GroupID.Groups).ElementAt(0);
+            var list = new List<string>();
+
+            for (var i = 0; i < groups.Groups_Length; i++)
+            {
+                var groupID = GroupSet.Groups_Item(ref groups, i);
+                if (groupID != 0)
+                    list.Add($"{(i > 0 ? "," : "")}\"GroupID{i+1:D2}\": {groupID}");
+            }
+
+            var ids = "";
+            foreach (var group in list)
+                ids += group;
+
+            json = json.Replace("\"Groups_Length\": 10", ids);
+            var obj = JsonSerializer.Deserialize<JsonElement>(json);
+            json = JsonSerializer.Serialize(obj, opt);
+        }
 
         var fileName = Path.ChangeExtension(name, ".json");
         File.WriteAllText(Path.Combine(dir, fileName), json);
@@ -477,7 +536,7 @@ public static class Program
     private static string GetItemName(ushort item, ReadOnlySpan<string> items, ReadOnlySpan<string> moves)
     {
         bool isTM = IsTM(item);
-        var tm = new PKHeX.Core.PersonalInfo9SV(new byte[] { 0x0 }).RecordPermitIndexes.ToArray();
+        var tm = PersonalDumperSV.TMIndexes;
 
         if (isTM) // append move name to TM
             return GetNameTM(item, items, moves, tm);

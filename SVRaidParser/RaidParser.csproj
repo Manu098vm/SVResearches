@@ -17,7 +17,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FlatSharp" Version="6.3.5" />
+    <PackageReference Include="FlatSharp.Compiler" Version="7.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="FlatSharp.Runtime" Version="7.1.1" />
   </ItemGroup>
 
 	<ItemGroup>
@@ -27,8 +31,8 @@
 		<Reference Include="pkNX.Structures.FlatBuffers">
 			<HintPath>deps\pkNX.Structures.FlatBuffers.dll</HintPath>
 		</Reference>
-		<Reference Include="PKHeX.Core">
-			<HintPath>deps\PKHeX.Core.dll</HintPath>
+	<Reference Include="pkNX.Structures.FlatBuffers.SV">
+			<HintPath>deps\pkNX.Structures.FlatBuffers.SV.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
