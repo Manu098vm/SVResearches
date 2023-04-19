@@ -15,9 +15,9 @@ public static class Program
             try
             {
                 if (Environment.GetCommandLineArgs().Length == 3 && (Environment.GetCommandLineArgs()[2].Equals("-n") || Environment.GetCommandLineArgs()[2].Equals("--null")))
-                    DumpDistributionRaids(Environment.GetCommandLineArgs()[1], true);
+                    DumpDistributionRaidsInit(Environment.GetCommandLineArgs()[1], true);
                 else
-                    DumpDistributionRaids(Environment.GetCommandLineArgs()[1], false);
+                    DumpDistributionRaidsInit(Environment.GetCommandLineArgs()[1], false);
             }
             catch (Exception ex)
             {
@@ -36,20 +36,37 @@ public static class Program
         Console.ReadKey();
     }
 
-    private static readonly int[][] StageStars =
+    private record RaidStorage(RaidEnemyTable Enemy, int File)
     {
-        new [] { 1, 2 },
-        new [] { 1, 2, 3 },
-        new [] { 1, 2, 3, 4 },
-        new [] { 3, 4, 5 },
-    };
+        private PokeDataBattle Poke => Enemy.Info.BossPokePara;
 
-    public static void DumpDistributionRaids(string path, bool parsenull)
+        public int Stars => Enemy.Info.Difficulty == 0 ? File + 1 : Enemy.Info.Difficulty;
+        public DevID Species => Poke.DevId;
+        public short Form => Poke.FormId;
+        public int Delivery => Enemy.Info.DeliveryGroupID;
+        public sbyte Rate => Enemy.Info.Rate;
+
+        public int RandRateStartScarlet { get; set; }
+        public int RandRateStartViolet { get; set; }
+
+        public short GetScarletRandMinScarlet()
+        {
+            if (Enemy.Info.RomVer == RaidRomType.TYPE_B)
+                return -1;
+            return (short)RandRateStartScarlet;
+        }
+
+        public short GetVioletRandMinViolet()
+        {
+            if (Enemy.Info.RomVer == RaidRomType.TYPE_A)
+                return -1;
+            return (short)RandRateStartViolet;
+        }
+    }
+
+    public static void DumpDistributionRaidsInit(string path, bool parsenull)
     {
         Console.WriteLine("Processing...");
-        var type2 = new List<byte[]>();
-        var type3 = new List<byte[]>();
-
         if (path.Contains("files"))
         {
             var newpath = path.Replace("files", "Files");
@@ -60,15 +77,32 @@ public static class Program
         if (path.Contains("null"))
             parsenull = true;
 
-        DumpDistributionRaids(path, type2, type3, parsenull);
+        DumpDistributionRaids(path, parsenull);
     }
 
-    private static void DumpDistributionRaids(string path, List<byte[]> type2, List<byte[]> type3, bool parsenull)
+    private static void DumpDistributionRaids(string path, bool parsenull)
     {
-        var dataEncounters = GetDistributionContents(Path.Combine(path, "raid_enemy_array"), out int indexEncounters);
-        var dataDrop = GetDistributionContents(Path.Combine(path, "fixed_reward_item_array"), out int indexDrop);
-        var dataBonus = GetDistributionContents(Path.Combine(path, "lottery_reward_item_array"), out int indexBonus);
-        var priority = GetDistributionContents(Path.Combine(path, "raid_priority_array"), out int indexPriority);
+        var encounterspath = Path.Combine(path, "raid_enemy_array_1_3_0");
+        var dropspath = Path.Combine(path, "fixed_reward_item_array_1_3_0");
+        var bonuspath = Path.Combine(path, "lottery_reward_item_array_1_3_0");
+        var prioritypath = Path.Combine(path, "raid_priority_array_1_3_0");
+
+        if(!File.Exists(encounterspath))
+            encounterspath = Path.Combine(path, "raid_enemy_array");
+        if(!File.Exists(dropspath))
+            dropspath = Path.Combine(path, "fixed_reward_item_array");
+        if(!File.Exists(bonuspath))
+            bonuspath = Path.Combine(path, "lottery_reward_item_array");
+        if(!File.Exists(prioritypath))
+            prioritypath = Path.Combine(path, "raid_priority_array");
+
+        var isMajorVersion = encounterspath.IndexOf("_1");
+        var version = isMajorVersion > 0 ? encounterspath.Substring(isMajorVersion, 6) : "";
+
+        var dataEncounters = GetDistributionContents(encounterspath, out int indexEncounters);
+        var dataDrop = GetDistributionContents(dropspath, out int indexDrop);
+        var dataBonus = GetDistributionContents(bonuspath, out int indexBonus);
+        var priority = GetDistributionContents(prioritypath, out int indexPriority);
 
         // BCAT Indexes can be reused by mixing and matching old files when reverting temporary distributions back to prior long-running distributions.
         // They don't have to match, but just note if they do.
@@ -85,49 +119,9 @@ public static class Program
             .Where(z => z.Info.Rate != 0)
             .GroupBy(z => z.Info.DeliveryGroupID);
 
-        var seven = DistroGroupSet.None;
-        var other = DistroGroupSet.None;
-
-        foreach (var group in byGroupID)
-        {
-            var items = group.ToArray();
-            var groupSet = Evaluate(items);
-
-            if (items.Any(z => z.Info.Difficulty > 7))
-                throw new Exception($"Undocumented difficulty {items.First(z => z.Info.Difficulty > 7).Info.Difficulty}");
-
-            if (items.All(z => z.Info.Difficulty == 7))
-            {
-                if (items.Any(z => z.Info.CaptureRate != 2))
-                    throw new Exception($"Undocumented 7 star capture rate {items.First(z => z.Info.CaptureRate != 2).Info.CaptureRate}");
-
-                if (!TryAdd(ref seven, groupSet))
-                    Console.WriteLine("Already saw a 7-star group. How do we differentiate this slot determination from prior?");
-
-                AddToList(items, type3, RaidSerializationFormat.Might);
-                continue;
-            }
-
-            if (items.Any(z => z.Info.Difficulty == 7))
-                throw new Exception($"Mixed difficulty {items.First(z => z.Info.Difficulty > 7).Info.Difficulty}");
-
-            if (!TryAdd(ref other, groupSet))
-                Console.WriteLine("Already saw a not-7-star group. How do we differentiate this slot determination from prior?");
-
-            AddToList(items, type2, RaidSerializationFormat.Distribution);
-        }
-
         var dirDistText = Path.Combine(path, "../Json");
-        ExportParse(dirDistText, tableEncounters, tableDrops, tableBonus, tablePriority, parsenull);
-        ExportIdentifierBlock(index, path);
-    }
-
-    private static bool TryAdd(ref DistroGroupSet exist, DistroGroupSet add)
-    {
-        if ((exist & add) != 0)
-            return false;
-        exist |= add;
-        return true;
+        ExportParse(dirDistText, tableEncounters, tableDrops, tableBonus, tablePriority, version, parsenull);
+        ExportIdentifierBlock(index, path, version);
     }
 
     [Flags]
@@ -139,101 +133,11 @@ public static class Program
         Both = SL | VL,
     }
 
-    private static DistroGroupSet Evaluate(DeliveryRaidEnemyTable[] items)
-    {
-        var versions = items.Select(z => z.Info.RomVer).Distinct().ToArray();
-        if (versions.Length == 2 && versions.Contains(RaidRomType.TYPE_A) && versions.Contains(RaidRomType.TYPE_B))
-            return DistroGroupSet.Both;
-        if (versions.Length == 1)
-        {
-            return versions[0] switch
-            {
-                RaidRomType.BOTH => DistroGroupSet.Both,
-                RaidRomType.TYPE_A => DistroGroupSet.SL,
-                RaidRomType.TYPE_B => DistroGroupSet.VL,
-                _ => throw new Exception("Unknown type."),
-            };
-        }
-        throw new Exception("Unknown version");
-    }
-
-    private static void ExportIdentifierBlock(int index, string path)
+    private static void ExportIdentifierBlock(int index, string path, string version)
     {
         var data = BitConverter.GetBytes((uint)index);
-        File.WriteAllBytes($"{path}\\event_raid_identifier", data);
+        File.WriteAllBytes($"{path}\\event_raid_identifier{version}", data);
         File.WriteAllText($"{path}\\..\\Identifier.txt", $"{index}");
-    }
-
-    private static void AddToList(IReadOnlyCollection<DeliveryRaidEnemyTable> table, List<byte[]> list, RaidSerializationFormat format)
-    {
-        // Get the total weight for each stage of star count
-        Span<ushort> weightTotalS = stackalloc ushort[StageStars.Length];
-        Span<ushort> weightTotalV = stackalloc ushort[StageStars.Length];
-        foreach (var enc in table)
-        {
-            var info = enc.Info;
-            if (info.Rate == 0)
-                continue;
-            var difficulty = info.Difficulty;
-            for (int stage = 0; stage < StageStars.Length; stage++)
-            {
-                if (!StageStars[stage].Contains(difficulty))
-                    continue;
-                if (info.RomVer != RaidRomType.TYPE_B)
-                    weightTotalS[stage] += (ushort)info.Rate;
-                if (info.RomVer != RaidRomType.TYPE_A)
-                    weightTotalV[stage] += (ushort)info.Rate;
-            }
-        }
-
-        Span<ushort> weightMinS = stackalloc ushort[StageStars.Length];
-        Span<ushort> weightMinV = stackalloc ushort[StageStars.Length];
-        foreach (var enc in table)
-        {
-            var info = enc.Info;
-            if (info.Rate == 0)
-                continue;
-            var difficulty = info.Difficulty;
-            TryAddToPickle(info, list, format, weightTotalS, weightTotalV, weightMinS, weightMinV);
-            for (int stage = 0; stage < StageStars.Length; stage++)
-            {
-                if (!StageStars[stage].Contains(difficulty))
-                    continue;
-                if (info.RomVer != RaidRomType.TYPE_B)
-                    weightMinS[stage] += (ushort)info.Rate;
-                if (info.RomVer != RaidRomType.TYPE_A)
-                    weightMinV[stage] += (ushort)info.Rate;
-            }
-        }
-    }
-
-    private static void TryAddToPickle(RaidEnemyInfo enc, ICollection<byte[]> list, RaidSerializationFormat format,
-    ReadOnlySpan<ushort> totalS, ReadOnlySpan<ushort> totalV, ReadOnlySpan<ushort> minS, ReadOnlySpan<ushort> minV)
-    {
-        using var ms = new MemoryStream();
-        using var bw = new BinaryWriter(ms);
-
-        enc.SerializePKHeX(bw, (byte)enc.Difficulty, enc.Rate, format);
-        for (int stage = 0; stage < StageStars.Length; stage++)
-        {
-            bool noTotal = !StageStars[stage].Contains(enc.Difficulty);
-            ushort mS = minS[stage];
-            ushort mV = minV[stage];
-            bw.Write(noTotal ? (ushort)0 : mS);
-            bw.Write(noTotal ? (ushort)0 : mV);
-            bw.Write(noTotal || enc.RomVer is RaidRomType.TYPE_B ? (ushort)0 : totalS[stage]);
-            bw.Write(noTotal || enc.RomVer is RaidRomType.TYPE_A ? (ushort)0 : totalV[stage]);
-        }
-
-        if (format == RaidSerializationFormat.Distribution)
-            enc.SerializeDistribution(bw);
-
-        if (format == RaidSerializationFormat.Might)
-            enc.SerializeMight(bw);
-
-        var bin = ms.ToArray();
-        if (!list.Any(z => z.SequenceEqual(bin)))
-            list.Add(bin);
     }
 
     private static void ExportParse(string dir,
@@ -241,6 +145,7 @@ public static class Program
         DeliveryRaidFixedRewardItemArray tableDrops,
         DeliveryRaidLotteryRewardItemArray tableBonus,
         DeliveryRaidPriorityArray tablePriority,
+        string version,
         bool parsenull)
     {
         Directory.CreateDirectory(dir);
@@ -248,10 +153,10 @@ public static class Program
         if(!parsenull)
             tableEncounters.RemoveEmptyEntries();
 
-        DumpJson(tableEncounters, dir, "raid_enemy_array");
-        DumpJson(tableDrops, dir, "fixed_reward_item_array");
-        DumpJson(tableBonus, dir, "lottery_reward_item_array");
-        DumpJson(tablePriority, dir, "raid_priority_array");
+        DumpJson(tableEncounters, dir, $"raid_enemy_array{version}");
+        DumpJson(tableDrops, dir, $"fixed_reward_item_array{version}");
+        DumpJson(tableBonus, dir, $"lottery_reward_item_array{version}");
+        DumpJson(tablePriority, dir, $"raid_priority_array{version}");
         DumpPretty(tableEncounters, tableDrops, tableBonus, tablePriority, dir);
     }
 
