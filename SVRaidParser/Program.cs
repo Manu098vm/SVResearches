@@ -350,24 +350,30 @@ public static class Program
                 const int count = RaidLotteryRewardItem.RewardItemCount;
                 float totalRate = 0;
                 for (int i = 0; i < count; i++)
-                    totalRate += item.GetRewardItem(i).Rate;
+                {
+                    RaidLotteryRewardItemInfo? drop = item.GetRewardItem(i);
+                    totalRate += drop is null ? 0 : item.GetRewardItem(i).Rate;
+                }
 
                 for (int i = 0; i < count; i++)
                 {
                     if (nameBonus != item.TableName)
                         continue;
 
-                    var drop = item.GetRewardItem(i);
-                    float rate = (float)(Math.Round((item.GetRewardItem(i).Rate / totalRate) * 100f, 2));
+                    RaidLotteryRewardItemInfo? drop = item.GetRewardItem(i);
+                    float rate = (float)(Math.Round((drop is null ? 0 : drop.Rate / totalRate) * 100f, 2));
 
-                    if (drop.Category == RaidRewardItemCategoryType.POKE) // Material
-                        lines.Add($"\t\t\t{rate,5}% {drop.Num,2} × TM Material");
+                    if (drop is null)
+                        lines.Add($"\t\t\t{rate,5}% {drop?.Num,2} × Null");
 
-                    if (drop.Category == RaidRewardItemCategoryType.GEM) // Tera Shard
-                        lines.Add($"\t\t\t{rate,5}% {drop.Num,2} × Tera Shard");
+                    else if (drop?.Category == RaidRewardItemCategoryType.POKE) // Material
+                        lines.Add($"\t\t\t{rate,5}% {drop?.Num,2} × TM Material");
 
-                    if (drop.ItemID != 0)
-                        lines.Add($"\t\t\t{rate,5}% {drop.Num,2} × {items[(ushort)drop.ItemID]}");
+                    else if (drop?.Category == RaidRewardItemCategoryType.GEM) // Tera Shard
+                        lines.Add($"\t\t\t{rate,5}% {drop?.Num,2} × Tera Shard");
+
+                    else if (drop?.ItemID != 0)
+                        lines.Add($"\t\t\t{rate,5}% {drop?.Num,2} × {items[drop is null ? 0 : (ushort)drop.ItemID]}");
                 }
             }
 
@@ -387,7 +393,7 @@ public static class Program
         var opt = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(flat, opt);
 
-        if (name.Equals("raid_priority_array"))
+        if (name.Contains("raid_priority_array"))
         {
             var table = ((DeliveryRaidPriorityArray)flat).Table;
             var groups = table.Select(g => g.GroupID.Groups).ElementAt(0);
