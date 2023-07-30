@@ -31,6 +31,7 @@ public static class Program
                     var KFixedSymbolRetainer09 = sav9.Where(i => i.Key == 0x74ABCACA).FirstOrDefault()!;
                     var KFixedSymbolRetainer10 = sav9.Where(i => i.Key == 0x74ABCC7D).FirstOrDefault()!;
                     var raid = sav9.Where(i => i.Key == 0xCAAC8800).FirstOrDefault()!;
+                    var raid7 = sav9.Where(i => i.Key == 0x8B14392F).FirstOrDefault()!;
 
                     var mystatus = sav9.Where(i => i.Key == 0xE3E89BD1).FirstOrDefault()!;
                     var overworld = sav9.Where(i => i.Key == 0x173304D8).FirstOrDefault()!;
@@ -109,6 +110,9 @@ public static class Program
 
                     Directory.CreateDirectory($"{path}\\Raid");
                     File.WriteAllBytes($"{path}\\Raid\\{raid.Key:X}.bin", raid.Data);
+
+                    Directory.CreateDirectory($"{path}\\Raid 7 Star");
+                    File.WriteAllBytes($"{path}\\Raid\\{raid7.Key:X}.bin", raid7.Data);
 
                     Directory.CreateDirectory($"{path}\\MyStatus");
                     File.WriteAllBytes($"{path}\\MyStatus\\{mystatus.Key:X}.bin", mystatus.Data);
