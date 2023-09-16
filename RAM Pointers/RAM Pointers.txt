@@ -1,3 +1,14 @@
+v2.0.1
+Paldea Raids:				[[[main+4622A30]+198]+88]+40
+B1S1:						[[[[main+4622A30]+198]+30]+9D0]
+Party:						[[[[main+46447D8]+08]+(30+(8*index)]+30]
+MyStatus:					[[main+46215F0]+10]+40
+Config:						[[main+46213A8]+10]+40
+fixed_reward_item_array:	[[[[main+46447C0]+08]+288]+E340]
+lottery_reward_item_array:	[[[[main+46447C0]+08]+288]+E378]
+raid_enemy_array:			[[[[main+46447C0]+08]+288]+E308]
+raid_priority_array:		[[[[main+46447C0]+08]+288]+E3B0]
+
 v1.3.2
 Raids:						[[main+44E4FE8]+160]+40
 B1S1:						[[[main+44E4F98]+A90]+9B0]
