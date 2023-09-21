@@ -108,14 +108,10 @@ public static class Program
         var isMajorVersion = encounterspath.IndexOf("_1");
         var version = isMajorVersion > 0 ? encounterspath.Substring(isMajorVersion, 6) : "";
 
-        Console.WriteLine("Reading...");    
-
         var dataEncounters = GetDistributionContents(encounterspath, out int indexEncounters);
         var dataDrop = GetDistributionContents(dropspath, out int indexDrop);
         var dataBonus = GetDistributionContents(bonuspath, out int indexBonus);
         var priority = GetDistributionContents(prioritypath, out int indexPriority);
-
-        Console.WriteLine("Parsing...");
 
         // BCAT Indexes can be reused by mixing and matching old files when reverting temporary distributions back to prior long-running distributions.
         // They don't have to match, but just note if they do.
@@ -254,6 +250,13 @@ public static class Program
                 _ => string.Empty,
             };
 
+            var gender = boss.Sex switch
+            {
+                SexType.MALE => "Male",
+                SexType.FEMALE => "Female",
+                _ => string.Empty,
+            };
+
             var form = boss.FormId == 0 ? string.Empty : $"-{(int)boss.FormId}";
 
             lines.Add($"{entry.Info.Difficulty}-Star {species[(int)boss.DevId]}{form}");
@@ -266,6 +269,9 @@ public static class Program
 
             if (boss.Seikaku != SeikakuType.DEFAULT)
                 lines.Add($"\tNature: {natures[(int)boss.Seikaku - 1]}");
+
+            if (boss.Sex != SexType.DEFAULT)
+                lines.Add($"\tGender: {gender}");
 
             lines.Add($"\tIVs: {iv}");
 
