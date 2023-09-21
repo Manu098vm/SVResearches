@@ -118,19 +118,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="itemname-eng" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\itemname-eng.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="itemname_english" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\itemname-english.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="monsname-eng" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\monsname-eng.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="monsname_english" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\monsname-english.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="seikaku-eng" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\seikaku-eng.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="seikaku_english" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\seikaku-english.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="typename-eng" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\typename-eng.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="typename_english" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\typename-english.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="wazaname-eng" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\wazaname-eng.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="wazaname_english" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wazaname-english.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

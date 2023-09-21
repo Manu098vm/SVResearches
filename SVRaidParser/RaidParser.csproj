@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FlatSharp.Runtime" Version="7.1.1" />
+    <PackageReference Include="FlatSharp.Runtime" Version="7.2.3" />
   </ItemGroup>
 
 	<ItemGroup>

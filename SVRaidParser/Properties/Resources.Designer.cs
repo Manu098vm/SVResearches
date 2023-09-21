@@ -63,9 +63,9 @@ namespace RaidParser.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] itemname_eng {
+        internal static byte[] itemname_english {
             get {
-                object obj = ResourceManager.GetObject("itemname-eng", resourceCulture);
+                object obj = ResourceManager.GetObject("itemname_english", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace RaidParser.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] monsname_eng {
+        internal static byte[] monsname_english {
             get {
-                object obj = ResourceManager.GetObject("monsname-eng", resourceCulture);
+                object obj = ResourceManager.GetObject("monsname_english", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace RaidParser.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] seikaku_eng {
+        internal static byte[] seikaku_english {
             get {
-                object obj = ResourceManager.GetObject("seikaku-eng", resourceCulture);
+                object obj = ResourceManager.GetObject("seikaku_english", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace RaidParser.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] typename_eng {
+        internal static byte[] typename_english {
             get {
-                object obj = ResourceManager.GetObject("typename-eng", resourceCulture);
+                object obj = ResourceManager.GetObject("typename_english", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace RaidParser.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] wazaname_eng {
+        internal static byte[] wazaname_english {
             get {
-                object obj = ResourceManager.GetObject("wazaname-eng", resourceCulture);
+                object obj = ResourceManager.GetObject("wazaname_english", resourceCulture);
                 return ((byte[])(obj));
             }
         }

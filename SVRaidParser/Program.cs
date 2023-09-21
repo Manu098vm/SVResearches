@@ -442,15 +442,15 @@ public static class Program
     {
         byte[] data;
         if (name.Equals("monsname"))
-            data = Resources.monsname_eng;
+            data = Resources.monsname_english;
         else if (name.Equals("itemname"))
-            data = Resources.itemname_eng;
+            data = Resources.itemname_english;
         else if (name.Equals("wazaname"))
-            data = Resources.wazaname_eng;
+            data = Resources.wazaname_english;
         else if (name.Equals("typename"))
-            data = Resources.typename_eng;
+            data = Resources.typename_english;
         else if (name.Equals("seikaku"))
-            data = Resources.seikaku_eng;
+            data = Resources.seikaku_english;
         else
             throw new ArgumentOutOfRangeException(name);
 
