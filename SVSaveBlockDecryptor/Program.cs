@@ -30,8 +30,9 @@ public static class Program
                     var KFixedSymbolRetainer08 = sav9.Where(i => i.Key == 0x74ABB4B3).FirstOrDefault()!;
                     var KFixedSymbolRetainer09 = sav9.Where(i => i.Key == 0x74ABCACA).FirstOrDefault()!;
                     var KFixedSymbolRetainer10 = sav9.Where(i => i.Key == 0x74ABCC7D).FirstOrDefault()!;
-                    var raid = sav9.Where(i => i.Key == 0xCAAC8800).FirstOrDefault()!;
-                    var raid7 = sav9.Where(i => i.Key == 0x8B14392F).FirstOrDefault()!;
+                    var raidPaldea = sav9.Where(i => i.Key == 0xCAAC8800).FirstOrDefault()!;
+                    var raidKitakami = sav9.Where(i => i.Key == 0x100B93DA).FirstOrDefault()!;
+                    var raid7star = sav9.Where(i => i.Key == 0x8B14392F).FirstOrDefault()!;
 
                     var mystatus = sav9.Where(i => i.Key == 0xE3E89BD1).FirstOrDefault()!;
                     var overworld = sav9.Where(i => i.Key == 0x173304D8).FirstOrDefault()!;
@@ -108,11 +109,14 @@ public static class Program
                     File.WriteAllBytes($"{path}\\KFixedSymbolRetainer10\\{KFixedSymbolRetainer10.Key:X}.bin", KFixedSymbolRetainer10.Data);
                     ExportPokemons(KFixedSymbolRetainer10.Data, $"{path}\\KFixedSymbolRetainer10", intensive: true);
 
-                    Directory.CreateDirectory($"{path}\\Raid");
-                    File.WriteAllBytes($"{path}\\Raid\\{raid.Key:X}.bin", raid.Data);
+                    Directory.CreateDirectory($"{path}\\Raid Paldea");
+                    File.WriteAllBytes($"{path}\\Raid Paldea\\{raidPaldea.Key:X}.bin", raidPaldea.Data);
+
+                    Directory.CreateDirectory($"{path}\\Raid Kitakami");
+                    File.WriteAllBytes($"{path}\\Raid Kitakami\\{raidKitakami.Key:X}.bin", raidKitakami.Data);
 
                     Directory.CreateDirectory($"{path}\\Raid 7 Star");
-                    File.WriteAllBytes($"{path}\\Raid\\{raid7.Key:X}.bin", raid7.Data);
+                    File.WriteAllBytes($"{path}\\Raid 7 Star\\{raid7star.Key:X}.bin", raid7star.Data);
 
                     Directory.CreateDirectory($"{path}\\MyStatus");
                     File.WriteAllBytes($"{path}\\MyStatus\\{mystatus.Key:X}.bin", mystatus.Data);

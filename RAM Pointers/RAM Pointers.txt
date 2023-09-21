@@ -1,5 +1,7 @@
 v2.0.1
 Paldea Raids:				[[[main+4622A30]+198]+88]+40
+Kitakami Raids:				[[[main+4622A30]+198]+88]+CD8
+7-Star Raids:				[[[main+4622A30]+198]+88]+25E8
 B1S1:						[[[[main+4622A30]+198]+30]+9D0]
 Party:						[[[[main+46447D8]+08]+(30+(8*index)]+30]
 MyStatus:					[[main+46215F0]+10]+40
