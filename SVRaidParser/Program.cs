@@ -106,6 +106,10 @@ public static class Program
             prioritypath = Path.Combine(path, "raid_priority_array");
 
         var isMajorVersion = encounterspath.IndexOf("_1");
+
+        if (isMajorVersion == -1)
+            isMajorVersion = encounterspath.IndexOf("_2");
+
         var version = isMajorVersion > 0 ? encounterspath.Substring(isMajorVersion, 6) : "";
 
         var dataEncounters = GetDistributionContents(encounterspath, out int indexEncounters);
