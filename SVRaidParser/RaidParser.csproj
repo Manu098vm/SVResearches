@@ -1,24 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	  <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>embedded</DebugType>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>embedded</DebugType>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FlatSharp.Runtime" Version="7.2.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="FlatSharp.Runtime" Version="7.3.0" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="pkNX.Structures">
@@ -27,24 +27,30 @@
 		<Reference Include="pkNX.Structures.FlatBuffers">
 			<HintPath>deps\pkNX.Structures.FlatBuffers.dll</HintPath>
 		</Reference>
-	<Reference Include="pkNX.Structures.FlatBuffers.SV">
-			<HintPath>deps\pkNX.Structures.FlatBuffers.SV.dll</HintPath>
+		<Reference Include="pkNX.Structures.FlatBuffers.SV.Raid">
+			<HintPath>deps\pkNX.Structures.FlatBuffers.SV.Raid.dll</HintPath>
+		</Reference>
+		<Reference Include="pkNX.Structures.FlatBuffers.SV.Shared">
+			<HintPath>deps\pkNX.Structures.FlatBuffers.SV.Shared.dll</HintPath>
+		</Reference>
+		<Reference Include="pkNX.Structures.FlatBuffers.SV.Personal">
+			<HintPath>deps\pkNX.Structures.FlatBuffers.SV.Personal.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Properties\Resources.Designer.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Resources.resx</DependentUpon>
-	  </Compile>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Update="Properties\Resources.resx">
-	    <Generator>ResXFileCodeGenerator</Generator>
-	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-	  </EmbeddedResource>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(OS)' == 'Windows_NT'">
