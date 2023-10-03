@@ -20,6 +20,7 @@ public static class Program
 
                     var box = sav9.Where(i => i.Key == 0x0D66012C).FirstOrDefault()!;
                     var party = sav9.Where(i => i.Key == 0x3AA1A9AD).FirstOrDefault()!;
+
                     var KFixedSymbolRetainer01 = sav9.Where(i => i.Key == 0x74ABBD32).FirstOrDefault()!;
                     var KFixedSymbolRetainer02 = sav9.Where(i => i.Key == 0x74ABBEE5).FirstOrDefault()!;
                     var KFixedSymbolRetainer03 = sav9.Where(i => i.Key == 0x74ABB9CC).FirstOrDefault()!;
@@ -30,6 +31,7 @@ public static class Program
                     var KFixedSymbolRetainer08 = sav9.Where(i => i.Key == 0x74ABB4B3).FirstOrDefault()!;
                     var KFixedSymbolRetainer09 = sav9.Where(i => i.Key == 0x74ABCACA).FirstOrDefault()!;
                     var KFixedSymbolRetainer10 = sav9.Where(i => i.Key == 0x74ABCC7D).FirstOrDefault()!;
+
                     var raidPaldea = sav9.Where(i => i.Key == 0xCAAC8800).FirstOrDefault()!;
                     var raidKitakami = sav9.Where(i => i.Key == 0x100B93DA).FirstOrDefault()!;
                     var raid7star = sav9.Where(i => i.Key == 0x8B14392F).FirstOrDefault()!;
@@ -44,6 +46,11 @@ public static class Program
                     var raidenemyarray = sav9.Where(i => i.Key == 0x0520A1B0).FirstOrDefault()!;
                     var raidpriorityarray = sav9.Where(i => i.Key == 0x095451E4).FirstOrDefault()!;
                     var eventraididentifier = sav9.Where(i => i.Key == 0x37B99B4D).FirstOrDefault()!;
+
+                    var KBCATOutbreakZonesPaldea = sav9.Where(i => i.Key == 0x3FDC5DFF).FirstOrDefault()!;
+                    var KBCATOutbreakZonesKitakami = sav9.Where(i => i.Key == 0xF9F156A3).FirstOrDefault()!;
+                    var KBCATOutbreakZonesBlueberry = sav9.Where(i => i.Key == 0x1B45E41C).FirstOrDefault()!;
+                    var KBCATOutbreakPokeData = sav9.Where(i => i.Key == 0x6C1A131B).FirstOrDefault()!;
 
                     path = $"{path}\\Dump";
                     Directory.CreateDirectory(path);
@@ -138,6 +145,12 @@ public static class Program
                     File.WriteAllBytes($"{path}\\EventRaidData\\raid_enemy_array", raidenemyarray.Data);
                     File.WriteAllBytes($"{path}\\EventRaidData\\raid_priority_array", raidpriorityarray.Data);
                     File.WriteAllBytes($"{path}\\EventRaidData\\event_raid_identifier", eventraididentifier.Data);
+
+                    Directory.CreateDirectory($"{path}\\EventOutbreakData");
+                    File.WriteAllBytes($"{path}\\EventOutbreakData\\KBCATOutbreakZonesPaldea", KBCATOutbreakZonesPaldea.Data);
+                    File.WriteAllBytes($"{path}\\EventOutbreakData\\KBCATOutbreakZonesKitakami", KBCATOutbreakZonesKitakami.Data);
+                    File.WriteAllBytes($"{path}\\EventOutbreakData\\KBCATOutbreakZonesBlueberry", KBCATOutbreakZonesBlueberry.Data);
+                    File.WriteAllBytes($"{path}\\EventOutbreakData\\KBCATOutbreakPokeData", KBCATOutbreakPokeData.Data);
 
                     Console.WriteLine($"Exported decrypted blocks from save file.\nPress any key to exit.");
                     Console.ReadKey();
