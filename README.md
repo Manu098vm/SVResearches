@@ -35,6 +35,13 @@ Event Raid data can be obtained by extracting the binaries from the save file wi
 
 To use, drag & drop the "files" folder into the exe. The folder must contain the "fixed_reward_item_array", "lottery_reward_item_array", "raid_enemy_array", "raid_priority_array" files.
 
+## SVOutbreakParser
+Similarly to the SVRaidParser, this is an adaptation for my needs of the [pkNX](https://github.com/kwsch/pkNX) [MassOutbreakRipper](https://github.com/kwsch/pkNX/blob/554bf8f2a5c042663e17920d484526d986785437/pkNX.WinForms/Dumping/MassOutbreakRipper.cs#L1) functionalities. This creates human-readable JSON data from Event Outbreak flatbuffers.
+This is used to build the JSONs in the [PPorg Event Gallery](https://github.com/projectpokemon/EventsGallery).
+Event Outbreak data can be obtained by extracting the binaries from the save file with SVSaveBlockDecryptor or from [BCAT](https://github.com/Manu098vm/bcat_updates).
+
+To use, drag & drop the "files" folder into the exe. The folder must contain the "pokedata_array", "zone_main_array", "zone_su1_array", "zone_su2_array" files.
+
 ## Random writings
 Exactly what the name tells. Collection of short writings I noted during my early tests/experiments/researches.
 
