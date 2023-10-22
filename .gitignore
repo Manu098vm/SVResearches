@@ -1,4 +1,8 @@
+.git
 .vs
 .vscode
-obj
-bin
+**/bin
+**/obj
+**/PublishProfiles
+**.user
+**.config

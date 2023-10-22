@@ -15,6 +15,10 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
+	
+	<PropertyGroup>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="FlatSharp.Runtime" Version="7.3.0" />
@@ -55,6 +59,6 @@
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(OS)' == 'Windows_NT'">
 		<RemoveDir Directories="$(OUTDIR)\cs; $(OUTDIR)\de; $(OUTDIR)\es; $(OUTDIR)\fr; $(OUTDIR)\it; $(OUTDIR)\ja; $(OUTDIR)\ko; $(OUTDIR)\pl; $(OUTDIR)\pt-BR; $(OUTDIR)\ru; $(OUTDIR)\tr; $(OUTDIR)\zh-Hans; $(OUTDIR)\zh-Hant" />
-		<Delete Files="$(OUTDIR)\RaidParser.deps.json; $(OUTDIR)\Humanizer.dll; $(OUTDIR)\Microsoft.Bcl.AsyncInterfaces.dll; $(OUTDIR)\Microsoft.CodeAnalysis.CSharp.Workspaces.dll; $(OUTDIR)\System.Composition.AttributedModel.dll; $(OUTDIR)\System.Composition.Convention.dll; $(OUTDIR)\System.Composition.Hosting.dll; $(OUTDIR)\System.Composition.Runtime.dll; $(OUTDIR)\System.Composition.TypedParts.dll" />
+		<Delete Files="$(OUTDIR)\Humanizer.dll; $(OUTDIR)\Microsoft.Bcl.AsyncInterfaces.dll; $(OUTDIR)\Microsoft.CodeAnalysis.CSharp.Workspaces.dll; $(OUTDIR)\System.Composition.AttributedModel.dll; $(OUTDIR)\System.Composition.Convention.dll; $(OUTDIR)\System.Composition.Hosting.dll; $(OUTDIR)\System.Composition.Runtime.dll; $(OUTDIR)\System.Composition.TypedParts.dll" />
 	</Target>
 </Project>

@@ -112,20 +112,15 @@ public static class Program
 
         var version = isMajorVersion > 0 ? encounterspath.Substring(isMajorVersion, 6) : "";
 
-        var dataEncounters = GetDistributionContents(encounterspath, out int indexEncounters);
-        var dataDrop = GetDistributionContents(dropspath, out int indexDrop);
-        var dataBonus = GetDistributionContents(bonuspath, out int indexBonus);
-        var priority = GetDistributionContents(prioritypath, out int indexPriority);
-
-        // BCAT Indexes can be reused by mixing and matching old files when reverting temporary distributions back to prior long-running distributions.
-        // They don't have to match, but just note if they do.
-        Debug.WriteLineIf(indexEncounters == indexDrop && indexDrop == indexBonus && indexBonus == indexPriority,
-            $"Info: BCAT indexes are inconsistent! enc:{indexEncounters} drop:{indexDrop} bonus:{indexBonus} priority:{indexPriority}");
+        var dataEncounters = GetDistributionContents(encounterspath);
+        var dataDrop = GetDistributionContents(dropspath);
+        var dataBonus = GetDistributionContents(bonuspath);
+        var dataPriority = GetDistributionContents(prioritypath);
 
         var tableEncounters = pkNX.Structures.FlatBuffers.FlatBufferConverter.DeserializeFrom<DeliveryRaidEnemyTableArray>(dataEncounters);
         var tableDrops = pkNX.Structures.FlatBuffers.FlatBufferConverter.DeserializeFrom<DeliveryRaidFixedRewardItemArray>(dataDrop);
         var tableBonus = pkNX.Structures.FlatBuffers.FlatBufferConverter.DeserializeFrom<DeliveryRaidLotteryRewardItemArray>(dataBonus);
-        var tablePriority = pkNX.Structures.FlatBuffers.FlatBufferConverter.DeserializeFrom<DeliveryRaidPriorityArray>(priority);
+        var tablePriority = pkNX.Structures.FlatBuffers.FlatBufferConverter.DeserializeFrom<DeliveryRaidPriorityArray>(dataPriority);
         var index = tablePriority.Table[0].VersionNo;
 
         var byGroupID = tableEncounters.Table
@@ -426,7 +421,7 @@ public static class Program
             {
                 var groupID = GroupSet.Groups_Item(ref groups, i);
                 if (groupID != 0)
-                    list.Add($"{(i > 0 ? "," : "")}\"GroupID{i+1:D2}\": {groupID}");
+                    list.Add($"{(i > 0 && list.Count > 0 ? "," : "")}\"GroupID{i+1:D2}\": {groupID}");
             }
 
             var ids = "";
@@ -442,11 +437,7 @@ public static class Program
         File.WriteAllText(Path.Combine(dir, fileName), json);
     }
 
-    private static byte[] GetDistributionContents(string path, out int index)
-    {
-        index = 0; //  todo
-        return File.ReadAllBytes(path);
-    }
+    private static byte[] GetDistributionContents(string path) => File.ReadAllBytes(path);
 
     private static string[] GetCommonText(string name, TextConfig cfg)
     {
