@@ -77,7 +77,6 @@ public static class Program
         //var tableZoneF2 = FlatBufferConverter.DeserializeFrom<DeliveryOutbreakArray>(dataZoneF2);
         var tablePokeData = FlatBufferConverter.DeserializeFrom<DeliveryOutbreakPokeDataArray>(dataPokeData);
 
-        //var index = tablePokeData.Table[0].ID > 0 ? uint.Parse($"{tablePokeData.Table[0].ID}"[..^3]) : 0;
         var index = tablePokeData.Table[0].ID > 0 ? uint.Parse($"{tablePokeData.Table[0].ID}"[..8]) : 0;
 
         var dirDistText = Path.Combine(path, "../Json");
