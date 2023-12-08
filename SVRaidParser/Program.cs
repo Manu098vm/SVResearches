@@ -1,6 +1,5 @@
 using pkNX.Structures;
 using pkNX.Structures.FlatBuffers.SV;
-using System.Diagnostics;
 using RaidParser.Properties;
 using System.Text.Json;
 
@@ -232,7 +231,7 @@ public static class Program
 
             var capture = entry.Info.CaptureRate switch
             {
-                // 0 never?
+                // 0 never
                 // 1 always
                 2 => "Only Once",
                 _ => $"{entry.Info.CaptureRate}",
@@ -263,6 +262,8 @@ public static class Program
                 lines.Add($"\tVersion: {version}");
 
             lines.Add($"\tTera Type: {gem}");
+            if (boss.Level != entry.Info.CaptureLv)
+                lines.Add($"\tBattle Level: {boss.Level}");
             lines.Add($"\tCapture Level: {entry.Info.CaptureLv}");
             lines.Add($"\tAbility: {ability}");
 
@@ -277,7 +278,7 @@ public static class Program
             var evs = boss.EffortValue.ToArray();
             if (evs.Any(z => z != 0))
             {
-                string[] names = new[] { "HP", "Atk", "Def", "SpA", "SpD", "Spe" };
+                string[] names = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
                 var spread = new List<string>();
 
                 for (int i = 0; i < evs.Length; i++)
@@ -299,7 +300,7 @@ public static class Program
             if (entry.Info.Difficulty == 7)
             {
                 float hp = entry.Info.BossDesc.HpCoef / 100f;
-                lines.Add($"\tHP Multiplier: {hp:0.0}x");
+                lines.Add($"\tHP Multiplier: {hp:0.0}×");
             }
 
             if (boss.Item != ItemID.ITEMID_NONE)
@@ -314,21 +315,23 @@ public static class Program
             if ((int)boss.Waza3.WazaId != 0) lines.Add($"\t\t\t- {moves[(int)boss.Waza3.WazaId]}");
             if ((int)boss.Waza4.WazaId != 0) lines.Add($"\t\t\t- {moves[(int)boss.Waza4.WazaId]}");
 
-            lines.Add($"\t\tExtra Moves:");
-
-            if ((int)extra.ExtraAction1.Wazano == 0 && (int)extra.ExtraAction2.Wazano == 0 && (int)extra.ExtraAction3.Wazano == 0 && (int)extra.ExtraAction4.Wazano == 0 && (int)extra.ExtraAction5.Wazano == 0 && (int)extra.ExtraAction6.Wazano == 0)
+            if (extra.PowerChargeTrigerHp != 0 && extra.PowerChargeTrigerTime != 0)
             {
-                lines.Add("\t\t\tNone!");
+                lines.Add($"\t\tShield Activation:");
+                lines.Add($"\t\t\t- {extra.PowerChargeTrigerHp}% HP Remaining");
+                lines.Add($"\t\t\t- {extra.PowerChargeTrigerTime}% Time Remaining");
             }
 
-            else
+            var actions = new[] { extra.ExtraAction1, extra.ExtraAction2, extra.ExtraAction3, extra.ExtraAction4, extra.ExtraAction5, extra.ExtraAction6 };
+            if (actions.Any(IsExtraActionValid))
             {
-                if ((int)extra.ExtraAction1.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction1.Wazano]}");
-                if ((int)extra.ExtraAction2.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction2.Wazano]}");
-                if ((int)extra.ExtraAction3.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction3.Wazano]}");
-                if ((int)extra.ExtraAction4.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction4.Wazano]}");
-                if ((int)extra.ExtraAction5.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction5.Wazano]}");
-                if ((int)extra.ExtraAction6.Wazano != 0) lines.Add($"\t\t\t- {moves[(int)extra.ExtraAction6.Wazano]}");
+                lines.Add("\t\tExtra Actions:");
+                if (IsExtraActionValid(actions[0])) lines.Add($"\t\t\t- {GetExtraActionInfo(actions[0], moves)}");
+                if (IsExtraActionValid(actions[1])) lines.Add($"\t\t\t- {GetExtraActionInfo(actions[1], moves)}");
+                if (IsExtraActionValid(actions[2])) lines.Add($"\t\t\t- {GetExtraActionInfo(actions[2], moves)}");
+                if (IsExtraActionValid(actions[3])) lines.Add($"\t\t\t- {GetExtraActionInfo(actions[3], moves)}");
+                if (IsExtraActionValid(actions[4])) lines.Add($"\t\t\t- {GetExtraActionInfo(actions[4], moves)}");
+                if (IsExtraActionValid(actions[5])) lines.Add($"\t\t\t- {GetExtraActionInfo(actions[5], moves)}");
             }
 
             lines.Add("\t\tItem Drops:");
@@ -404,6 +407,30 @@ public static class Program
     private static void RemoveEmptyEntries(this DeliveryRaidEnemyTableArray encounters)
     {
         encounters.Table = encounters.Table.Where(z => z.Info.BossPokePara.DevId != 0).ToArray();
+    }
+
+    private static bool IsExtraActionValid(RaidBossExtraData action)
+    {
+        if (action.Action == RaidBossExtraActType.NONE) // no action set
+            return false;
+        if (action.Value == 0) // no percentage set
+            return false;
+        if (action.Action == RaidBossExtraActType.WAZA && action.Wazano == WazaID.WAZA_NULL) // no move set
+            return false;
+        return true;
+    }
+
+    private static string GetExtraActionInfo(RaidBossExtraData action, string[] moves)
+    {
+        var type = action.Timing == RaidBossExtraTimingType.TIME ? "Time" : "HP";
+        return action.Action switch
+        {
+            RaidBossExtraActType.BOSS_STATUS_RESET => $"Reset Raid Boss' Stat Changes at {action.Value}% {type} Remaining",
+            RaidBossExtraActType.PLAYER_STATUS_RESET => $"Reset Player's Stat Changes at {action.Value}% {type} Remaining",
+            RaidBossExtraActType.WAZA => $"Use {moves[(int)action.Wazano]} at {action.Value}% {type} Remaining",
+            RaidBossExtraActType.GEM_COUNT => $"Reduce Tera Orb Charge at {action.Value}% {type} Remaining",
+            _ => "",
+        };
     }
 
     private static void DumpJson(object flat, string dir, string name)
