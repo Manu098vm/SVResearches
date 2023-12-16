@@ -37,6 +37,7 @@ public static class Program
                     var raid7star = sav9.Where(i => i.Key == 0x8B14392F).FirstOrDefault()!;
 
                     var mystatus = sav9.Where(i => i.Key == 0xE3E89BD1).FirstOrDefault()!;
+                    var kconfig = sav9.Where(i => i.Key == 0xDF4F1875).FirstOrDefault()!;
                     var overworld = sav9.Where(i => i.Key == 0x173304D8).FirstOrDefault()!;
                     var kcoordinates = sav9.Where(i => i.Key == 0x708D1511).FirstOrDefault()!;
                     var mysterygift = sav9.Where(i => i.Key == 0x99E1625E).FirstOrDefault()!;
@@ -127,6 +128,9 @@ public static class Program
 
                     Directory.CreateDirectory($"{path}\\MyStatus");
                     File.WriteAllBytes($"{path}\\MyStatus\\{mystatus.Key:X}.bin", mystatus.Data);
+
+                    Directory.CreateDirectory($"{path}\\KConfig");
+                    File.WriteAllBytes($"{path}\\KConfig\\{kconfig.Key:X}.bin", kconfig.Data);
 
                     Directory.CreateDirectory($"{path}\\Overworld\\Encrypted");
                     Directory.CreateDirectory($"{path}\\Overworld\\Decrypted");
