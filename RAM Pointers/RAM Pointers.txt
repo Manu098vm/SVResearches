@@ -3,7 +3,8 @@ Paldea Raids:				[[[main+47350D8]+1C0]+88]+40
 Kitakami Raids:				[[[main+47350D8]+1C0]+88]+CD8
 7-Star Raids:				[[[main+47350D8]+1C0]+88]+25E8
 B1S1:						[[[[[[main+47350D8]+D8]+08]+B8]+30]+9D0]
-Party:						[[[[main+4763C98]+08]+(30+(8*index)]+30]
+Party:						[[[[main+4763C98]+08]+(30+(8*index))]+30]
+PartyStats:					[[[[main+4763C98]+08]+(30+(8*index))]+50]
 MyStatus:					[[[[[main+47350D8]+D8]+08]+B8]]+40
 KConfig:					[[[[[main+47350D8]+D8]+08]+B8]+D0]+40
 fixed_reward_item_array:	[[[[main+4763C80]+08]+288]+E340]	
