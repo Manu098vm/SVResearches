@@ -28,10 +28,10 @@ public static class Program
         else
             Console.WriteLine($"Drag and drop the event \"files\" folder into the .exe.\n" +
                 $"The files folder must contain the following files:\n" +
-                $"- pokedata_array_2_0_0\n" +
-                $"- zone_main_array_2_0_0\n" +
-                $"- zone_su1_array_2_0_0\n" +
-                $"- zone_su2_array_2_0_0 (optional)");
+                $"- pokedata_array_3_0_0\n" +
+                $"- zone_main_array_3_0_0\n" +
+                $"- zone_su1_array_3_0_0\n" +
+                $"- zone_su2_array_3_0_0");
 
         Console.WriteLine("Process finished. Press any key to exit.");
         Console.ReadKey();
@@ -55,47 +55,37 @@ public static class Program
 
     private static void DumpDeliveryOutbreakData(string path, bool parsenull)
     {
-        var zoneF0path = Path.Combine(path, "zone_main_array_2_0_0");
-        var zoneF1path = Path.Combine(path, "zone_su1_array_2_0_0");
-        //var zoneF2path = Path.Combine(path, "zone_su2_array_2_0_0");
-        var pokedatapath = Path.Combine(path, "pokedata_array_2_0_0");
-
-        var isMajorVersion = pokedatapath.IndexOf("_1");
-
-        if (isMajorVersion == -1)
-            isMajorVersion = pokedatapath.IndexOf("_2");
-
-        var version = isMajorVersion > 0 ? pokedatapath.Substring(isMajorVersion, 6) : "";
+        var zoneF0path = Path.Combine(path, "zone_main_array_3_0_0");
+        var zoneF1path = Path.Combine(path, "zone_su1_array_3_0_0");
+        var zoneF2path = Path.Combine(path, "zone_su2_array_3_0_0");
+        var pokedatapath = Path.Combine(path, "pokedata_array_3_0_0");
+        var version = pokedatapath.Substring(pokedatapath.IndexOf("_3"), 6);
 
         var dataZoneF0 = GetDistributionContents(zoneF0path);
         var dataZoneF1 = GetDistributionContents(zoneF1path);
-        //var dataZoneF2 = GetDistributionContents(zoneF2path);
+        var dataZoneF2 = GetDistributionContents(zoneF2path);
         var dataPokeData = GetDistributionContents(pokedatapath);
 
         var tableZoneF0 = FlatBufferConverter.DeserializeFrom<DeliveryOutbreakArray>(dataZoneF0);
         var tableZoneF1 = FlatBufferConverter.DeserializeFrom<DeliveryOutbreakArray>(dataZoneF1);
-        //var tableZoneF2 = FlatBufferConverter.DeserializeFrom<DeliveryOutbreakArray>(dataZoneF2);
+        var tableZoneF2 = FlatBufferConverter.DeserializeFrom<DeliveryOutbreakArray>(dataZoneF2);
         var tablePokeData = FlatBufferConverter.DeserializeFrom<DeliveryOutbreakPokeDataArray>(dataPokeData);
 
         var index = tablePokeData.Table[0].ID > 0 ? uint.Parse($"{tablePokeData.Table[0].ID}"[..8]) : 0;
 
         var dirDistText = Path.Combine(path, "../Json");
 
-        ExportParse(dirDistText, tableZoneF0, tableZoneF1, tablePokeData, version, index, parsenull);
-        ExportIdentifierBlock(index, path, version);
+        ExportParse(dirDistText, tableZoneF0, tableZoneF1, tableZoneF2, tablePokeData, version, index, parsenull);
+        ExportIdentifierBlock(index, path);
     }
 
     private static byte[] GetDistributionContents(string path) =>
         File.ReadAllBytes(path);
 
-    private static void ExportIdentifierBlock(uint index, string path, string version)
-    {
-        var data = BitConverter.GetBytes(index);
-        //File.WriteAllBytes($"{path}\\event_outbreak_identifier{version}", data);
+    private static void ExportIdentifierBlock(uint index, string path) =>
         File.WriteAllText($"{path}\\..\\Identifier.txt", $"{index}");
-    }
 
-    private static void ExportParse(string dir, DeliveryOutbreakArray tableZoneF0, DeliveryOutbreakArray tableZoneF1, DeliveryOutbreakPokeDataArray tablePokeData, string version, uint identifier, bool parsenull)
+    private static void ExportParse(string dir, DeliveryOutbreakArray tableZoneF0, DeliveryOutbreakArray tableZoneF1, DeliveryOutbreakArray tableZoneF2, DeliveryOutbreakPokeDataArray tablePokeData, string version, uint identifier, bool parsenull)
     {
         Directory.CreateDirectory(dir);
 
@@ -103,11 +93,12 @@ public static class Program
             tablePokeData.RemoveEmptyEntries();
             tableZoneF0.RemoveEmptyEntries();
             tableZoneF1.RemoveEmptyEntries();
+            tableZoneF2.RemoveEmptyEntries();
         }
 
         DumpJson(tableZoneF0, dir, $"zone_main_array{version}");
         DumpJson(tableZoneF1, dir, $"zone_su1_array{version}");
-        //DumpJson(tableZoneF2, dir, "zone_su2");
+        DumpJson(tableZoneF2, dir, $"zone_su2_array{version}");
         DumpJson(tablePokeData, dir, $"pokedata_array{version}");
         DumpPretty(identifier, tablePokeData, dir);
     }

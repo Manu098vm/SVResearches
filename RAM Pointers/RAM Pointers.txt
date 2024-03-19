@@ -1,4 +1,4 @@
-v3.0.0
+v3.0.0/v3.0.1
 Paldea Raids:				[[[main+47350D8]+1C0]+88]+40
 Kitakami Raids:				[[[main+47350D8]+1C0]+88]+CD8
 7-Star Raids:				[[[main+47350D8]+1C0]+88]+25E8

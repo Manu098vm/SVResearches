@@ -81,10 +81,19 @@ public static class Program
 
     private static void DumpDistributionRaids(string path, bool parsenull)
     {
-        var encounterspath = Path.Combine(path, "raid_enemy_array_2_0_0");
-        var dropspath = Path.Combine(path, "fixed_reward_item_array_2_0_0");
-        var bonuspath = Path.Combine(path, "lottery_reward_item_array_2_0_0");
-        var prioritypath = Path.Combine(path, "raid_priority_array_2_0_0");
+        var encounterspath = Path.Combine(path, "raid_enemy_array_3_0_0");
+        var dropspath = Path.Combine(path, "fixed_reward_item_array_3_0_0");
+        var bonuspath = Path.Combine(path, "lottery_reward_item_array_3_0_0");
+        var prioritypath = Path.Combine(path, "raid_priority_array_3_0_0");
+
+        if (!File.Exists(encounterspath))
+            encounterspath = Path.Combine(path, "raid_enemy_array_2_0_0");
+        if (!File.Exists(dropspath))
+            dropspath = Path.Combine(path, "fixed_reward_item_array_2_0_0");
+        if (!File.Exists(bonuspath))
+            bonuspath = Path.Combine(path, "lottery_reward_item_array_2_0_0");
+        if (!File.Exists(prioritypath))
+            prioritypath = Path.Combine(path, "raid_priority_array_2_0_0");
 
         if (!File.Exists(encounterspath))
             encounterspath = Path.Combine(path, "raid_enemy_array_1_3_0");
@@ -108,6 +117,9 @@ public static class Program
 
         if (isMajorVersion == -1)
             isMajorVersion = encounterspath.IndexOf("_2");
+
+        if (isMajorVersion == -1)
+            isMajorVersion = encounterspath.IndexOf("_3");
 
         var version = isMajorVersion > 0 ? encounterspath.Substring(isMajorVersion, 6) : "";
 

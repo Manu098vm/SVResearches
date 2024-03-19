@@ -34,6 +34,7 @@ public static class Program
 
                     var raidPaldea = sav9.Where(i => i.Key == 0xCAAC8800).FirstOrDefault()!;
                     var raidKitakami = sav9.Where(i => i.Key == 0x100B93DA).FirstOrDefault()!;
+                    var raidBlueberry = sav9.Where(i => i.Key == 0x0C62D416).FirstOrDefault()!;
                     var raid7star = sav9.Where(i => i.Key == 0x8B14392F).FirstOrDefault()!;
 
                     var mystatus = sav9.Where(i => i.Key == 0xE3E89BD1).FirstOrDefault()!;
@@ -122,6 +123,9 @@ public static class Program
 
                     Directory.CreateDirectory($"{path}\\Raid Kitakami");
                     File.WriteAllBytes($"{path}\\Raid Kitakami\\{raidKitakami.Key:X}.bin", raidKitakami.Data);
+
+                    Directory.CreateDirectory($"{path}\\Raid Blueberry");
+                    File.WriteAllBytes($"{path}\\Raid Blueberry\\{raidBlueberry.Key:X}.bin", raidBlueberry.Data);
 
                     Directory.CreateDirectory($"{path}\\Raid 7 Star");
                     File.WriteAllBytes($"{path}\\Raid 7 Star\\{raid7star.Key:X}.bin", raid7star.Data);
