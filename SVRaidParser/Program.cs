@@ -9,30 +9,47 @@ public static class Program
 {
     public static void Main()
     {
-        if (Environment.GetCommandLineArgs().Length == 2 || Environment.GetCommandLineArgs().Length == 3)
+        var debugPath = "";
+        if (!debugPath.Equals(""))
         {
             try
             {
-                if (Environment.GetCommandLineArgs().Length == 3 && (Environment.GetCommandLineArgs()[2].Equals("-n") || Environment.GetCommandLineArgs()[2].Equals("--null")))
-                    DumpDistributionRaidsInit(Environment.GetCommandLineArgs()[1], true);
-                else
-                    DumpDistributionRaidsInit(Environment.GetCommandLineArgs()[1], false);
+                DumpDistributionRaidsInit(debugPath, false);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
+            Console.WriteLine("Process finished. Press any key to exit.");
+            Console.ReadKey();
         }
         else
-            Console.WriteLine($"Drag and drop the event \"files\" folder into the .exe.\n" +
-                $"The files folder must contain the following files:\n" +
-                $"- fixed_reward_item_array\n" +
-                $"- lottery_reward_item_array\n" +
-                $"- raid_enemy_array\n" +
-                $"- raid_priority_array");
+        {
+            if (Environment.GetCommandLineArgs().Length == 2 || Environment.GetCommandLineArgs().Length == 3)
+            {
+                try
+                {
+                    if (Environment.GetCommandLineArgs().Length == 3 && (Environment.GetCommandLineArgs()[2].Equals("-n") || Environment.GetCommandLineArgs()[2].Equals("--null")))
+                        DumpDistributionRaidsInit(Environment.GetCommandLineArgs()[1], true);
+                    else
+                        DumpDistributionRaidsInit(Environment.GetCommandLineArgs()[1], false);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+            else
+                Console.WriteLine($"Drag and drop the event \"files\" folder into the .exe.\n" +
+                    $"The files folder must contain the following files:\n" +
+                    $"- fixed_reward_item_array\n" +
+                    $"- lottery_reward_item_array\n" +
+                    $"- raid_enemy_array\n" +
+                    $"- raid_priority_array");
 
-        Console.WriteLine("Process finished. Press any key to exit.");
-        Console.ReadKey();
+            Console.WriteLine("Process finished. Press any key to exit.");
+            Console.ReadKey();
+        }
     }
 
     private record RaidStorage(RaidEnemyTable Enemy, int File)
