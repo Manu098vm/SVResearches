@@ -166,7 +166,7 @@ public static class Program
             else if (entry.RarePercentage == 100)
                 shiny = "Always";
             else
-                shiny = $"{entry.RarePercentage}% rate";
+                shiny = $"{entry.RarePercentage.ToString().Replace(',', '.')}% rate";
 
             string size = "";
             if (!entry.EnableScaleRange)
@@ -206,13 +206,13 @@ public static class Program
             lines.Add($"\tShiny: {shiny}");
 
             if (ribbon != RibbonType.NONE)
-                lines.Add($"\tRibbon: {(PKHeX.Core.RibbonIndex)(int)ribbon - 1} ({entry.AddRibbonPercentage}%)");
+                lines.Add($"\tRibbon: {(PKHeX.Core.RibbonIndex)(int)ribbon - 1} ({entry.AddRibbonPercentage.ToString().Replace(',', '.')}%)");
 
             if (size != string.Empty)
                 lines.Add($"\tScale: {size}");
 
             if (item != ItemID.ITEMID_NONE)
-                lines.Add($"\tHeld Item: {items[(int)item]} ({entry.Item!.Value.BringRate}%)");
+                lines.Add($"\tHeld Item: {items[(int)item]} ({entry.Item!.Value.BringRate.ToString().Replace(',', '.')}%)");
         }
 
         File.WriteAllLines(Path.Combine(dir, $"../Encounters.txt"), lines);
