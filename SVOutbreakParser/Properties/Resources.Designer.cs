@@ -79,5 +79,35 @@ namespace OutbreakParser.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] outbreak_point_main {
+            get {
+                object obj = ResourceManager.GetObject("outbreak_point_main", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] outbreak_point_su1 {
+            get {
+                object obj = ResourceManager.GetObject("outbreak_point_su1", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] outbreak_point_su2 {
+            get {
+                object obj = ResourceManager.GetObject("outbreak_point_su2", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

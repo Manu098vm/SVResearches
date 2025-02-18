@@ -100,8 +100,101 @@ public static class Program
         DumpJson(tableZoneF1, dir, $"zone_su1_array{version}");
         DumpJson(tableZoneF2, dir, $"zone_su2_array{version}");
         DumpJson(tablePokeData, dir, $"pokedata_array{version}");
-        DumpPretty(identifier, tablePokeData, dir);
+
+        var dpF0 = Resources.outbreak_point_main;
+        var dpF1 = Resources.outbreak_point_su1;
+        var dpF2 = Resources.outbreak_point_su2;
+
+        var pointsF0 = FlatBufferConverter.DeserializeFrom<OutbreakPointArray>(dpF0).Table;
+        var pointsF1 = FlatBufferConverter.DeserializeFrom<OutbreakPointArray>(dpF1).Table;
+        var pointsF2 = FlatBufferConverter.DeserializeFrom<OutbreakPointArray>(dpF2).Table;
+
+        var main = GetForMap(pointsF0, tableZoneF0, tablePokeData, ZoneType.Main);
+        var su1 = GetForMap(pointsF1, tableZoneF1, tablePokeData, ZoneType.Su1);
+        var su2 = GetForMap(pointsF2, tableZoneF2, tablePokeData, ZoneType.Su2);
+
+        DumpPretty(identifier, main.Concat(su1).Concat(su2), dir);
     }
+
+    private static OutbreakEncounter[] GetForMap(IEnumerable<OutbreakPointData> points, DeliveryOutbreakArray possible, DeliveryOutbreakPokeDataArray pd, ZoneType baseMet)
+    {
+        var encs = GetMetaEncounter(possible.Table, pd);
+        foreach (var enc in encs)
+        {
+            enc.MetBase = ZoneType.None;
+            enc.MetLevel = new LevelRange(100, 1);
+        }
+
+        foreach (var enc in encs)
+        {
+            foreach (var point in points)
+            {
+                var poke = enc.Poke;
+                if (!poke.IsLevelRangeCompatible(point.LevelRange))
+                    continue;
+                if (!poke.IsEnableCompatible(point.EnableTable))
+                    continue;
+                if (!poke.IsCompatibleArea((byte)point.AreaNo))
+                    continue;
+                if (!poke.IsCompatibleArea(point.AreaName))
+                    continue;
+
+                var min = Math.Min(enc.MetLevel.Min, (byte)point.LevelRange.X);
+                var max = Math.Max(enc.MetLevel.Max, (byte)point.LevelRange.Y);
+                enc.MetLevel = new LevelRange(min, max);
+                enc.MetBase = baseMet;
+            }
+
+            if (enc.MetBase != ZoneType.None)
+            {
+                var min = Math.Max((byte)enc.Poke.MinLevel, enc.MetLevel.Min);
+                var max = Math.Min((byte)enc.Poke.MaxLevel, enc.MetLevel.Max);
+                enc.MetLevel = new LevelRange(min, max);
+            }
+        }
+        return encs;
+    }
+
+    private static OutbreakEncounter[] GetMetaEncounter(IEnumerable<DeliveryOutbreak> possibleTable, DeliveryOutbreakPokeDataArray pd)
+    {
+        var ret = new List<OutbreakEncounter>();
+        var hs = new HashSet<ulong>();
+        foreach (var outbreak in possibleTable)
+        {
+            TryAdd(outbreak.Poke1, outbreak.Poke1LotValue);
+            TryAdd(outbreak.Poke2, outbreak.Poke2LotValue);
+            TryAdd(outbreak.Poke3, outbreak.Poke3LotValue);
+            TryAdd(outbreak.Poke4, outbreak.Poke4LotValue);
+            TryAdd(outbreak.Poke5, outbreak.Poke5LotValue);
+            continue;
+            void TryAdd(ulong ID, short rate)
+            {
+                if (ID == 0 || rate <= 0 || !hs.Add(ID))
+                    return;
+                var poke = pd.Table.First(z => z.ID == ID);
+                ret.Add(new OutbreakEncounter { ZoneID = outbreak.ZoneID, Poke = poke });
+            }
+        }
+        return [.. ret];
+    }
+
+    private class OutbreakEncounter
+    {
+        public ulong ZoneID { get; init; }
+        public required DeliveryOutbreakPokeData Poke { get; init; }
+        public ZoneType MetBase { get; set; }
+        public LevelRange MetLevel { get; set; }
+    }
+
+    private enum ZoneType : byte
+    {
+        None = 0,
+        Main = 1,
+        Su1 = 2,
+        Su2 = 3,
+    }
+
+    private record struct LevelRange(byte Min, byte Max);
 
     private static void RemoveEmptyEntries(this DeliveryOutbreakPokeDataArray encounters) =>
         encounters.Table = encounters.Table.Where(z => z.DevId != 0).ToArray();
@@ -131,7 +224,7 @@ public static class Program
         return new TextFile(data, cfg).Lines;
     }
 
-    private static void DumpPretty(uint identifier, DeliveryOutbreakPokeDataArray tablePokeData, string dir)
+    private static void DumpPretty(uint identifier, IEnumerable<OutbreakEncounter> encounters, string dir)
     {
         var cfg = new TextConfig(GameVersion.SV);
         var lines = new List<string>();
@@ -142,12 +235,11 @@ public static class Program
 
         lines.Add($"Event Outbreak Identifier: {ident}");
 
-        foreach (var entry in tablePokeData.Table)
+        foreach (var enc in encounters.Where(e => e.MetBase is not ZoneType.None))
         {
             lines.Add("");
 
-            if (entry.DevId == DevID.DEV_NULL)
-                continue;
+            var entry = enc.Poke;
 
             string version = "";
             if (entry.Version is not null)
@@ -173,6 +265,14 @@ public static class Program
                 size = string.Empty;
             else
                 size = $"{entry.MinScale}-{entry.MaxScale}";
+
+            string zone = enc.MetBase switch
+            {
+                ZoneType.Main => "Paldea",
+                ZoneType.Su1 => "Kitakami",
+                ZoneType.Su2 => "Blueberry Academy",
+                _ => string.Empty,
+            };
 
             var gender = entry.Sex switch
             {
@@ -213,6 +313,8 @@ public static class Program
 
             if (item != ItemID.ITEMID_NONE)
                 lines.Add($"\tHeld Item: {items[(int)item]} ({entry.Item!.Value.BringRate.ToString().Replace(',', '.')}%)");
+
+            lines.Add($"\tRegion: {zone}");
         }
 
         File.WriteAllLines(Path.Combine(dir, $"../Encounters.txt"), lines);
