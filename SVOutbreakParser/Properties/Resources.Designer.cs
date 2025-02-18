@@ -109,5 +109,15 @@ namespace OutbreakParser.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] zone_su2_array_3_0_0 {
+            get {
+                object obj = ResourceManager.GetObject("zone_su2_array_3_0_0", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

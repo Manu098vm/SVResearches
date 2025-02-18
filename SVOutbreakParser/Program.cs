@@ -28,10 +28,10 @@ public static class Program
         else
             Console.WriteLine($"Drag and drop the event \"files\" folder into the .exe.\n" +
                 $"The files folder must contain the following files:\n" +
-                $"- pokedata_array_3_0_0\n" +
-                $"- zone_main_array_3_0_0\n" +
-                $"- zone_su1_array_3_0_0\n" +
-                $"- zone_su2_array_3_0_0");
+                $"- pokedata_array\n" +
+                $"- zone_main_array\n" +
+                $"- zone_su1_array\n" +
+                $"- zone_su2_array");
 
         Console.WriteLine("Process finished. Press any key to exit.");
         Console.ReadKey();
@@ -55,16 +55,22 @@ public static class Program
 
     private static void DumpDeliveryOutbreakData(string path, bool parsenull)
     {
-        var zoneF0path = Path.Combine(path, "zone_main_array_3_0_0");
-        var zoneF1path = Path.Combine(path, "zone_su1_array_3_0_0");
-        var zoneF2path = Path.Combine(path, "zone_su2_array_3_0_0");
-        var pokedatapath = Path.Combine(path, "pokedata_array_3_0_0");
-        var version = pokedatapath.Substring(pokedatapath.IndexOf("_3"), 6);
+        var v = 3;
 
+        var zoneF2path = Path.Combine(path, "zone_su2_array_3_0_0");
+
+        if (!File.Exists(zoneF2path))
+            v = 2;
+
+        var pokedatapath = Path.Combine(path, $"pokedata_array_{v}_0_0");
+        var zoneF0path = Path.Combine(path, $"zone_main_array_{v}_0_0");
+        var zoneF1path = Path.Combine(path, $"zone_su1_array_{v}_0_0");
+        var version = pokedatapath.Substring(pokedatapath.IndexOf($"_{v}"), 6);
+
+        var dataPokeData = GetDistributionContents(pokedatapath);
         var dataZoneF0 = GetDistributionContents(zoneF0path);
         var dataZoneF1 = GetDistributionContents(zoneF1path);
-        var dataZoneF2 = GetDistributionContents(zoneF2path);
-        var dataPokeData = GetDistributionContents(pokedatapath);
+        var dataZoneF2 = v > 2 ? GetDistributionContents(zoneF2path) : Resources.zone_su2_array_3_0_0;
 
         var tableZoneF0 = FlatBufferConverter.DeserializeFrom<DeliveryOutbreakArray>(dataZoneF0);
         var tableZoneF1 = FlatBufferConverter.DeserializeFrom<DeliveryOutbreakArray>(dataZoneF1);
