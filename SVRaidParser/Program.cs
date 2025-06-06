@@ -329,7 +329,7 @@ public static class Program
             if (entry.Info.Difficulty == 7)
             {
                 float hp = entry.Info.BossDesc.HpCoef / 100f;
-                lines.Add($"\tHP Multiplier: {hp:0.0}×");
+                lines.Add($"\tHP Multiplier: {hp:0.0}×".Replace(",","."));
             }
 
             if (boss.Item != ItemID.ITEMID_NONE)
